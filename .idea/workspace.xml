@@ -4,21 +4,56 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f4a90caf-4d97-4a9d-b34e-600a4848a2a5" name="Changes" comment="initial commit" />
+    <list default="true" id="f4a90caf-4d97-4a9d-b34e-600a4848a2a5" name="Changes" comment="initial commit">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/GRT.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/GRT.geojson" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/carreaux_200m_mart.gpkg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/carreaux_200m_met.gpkg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/carreaux_200m_reun.gpkg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/terega.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/terega.geojson" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ressources/terega.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/GazGridOverview.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/GazGridOverview.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;rognit&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/rognit/GazGridOverview.git&quot;,
+    &quot;accountId&quot;: &quot;3a2e1d3e-f28c-412a-a0c7-24b3c8d82281&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 3
 }</component>
   <component name="ProjectId" id="2h0VmkRunr8YNr3JvJDIIi2cIYA" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -33,7 +68,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -55,7 +90,12 @@
       <updated>1716731142821</updated>
       <workItem from="1716731144156" duration="3118000" />
       <workItem from="1717335815488" duration="614000" />
-      <workItem from="1717336463612" duration="297000" />
+      <workItem from="1717336463612" duration="3714000" />
+      <workItem from="1717437822242" duration="63000" />
+      <workItem from="1717437893034" duration="1220000" />
+      <workItem from="1717439139628" duration="82000" />
+      <workItem from="1717439229522" duration="80000" />
+      <workItem from="1717439318982" duration="299000" />
     </task>
     <task id="LOCAL-00001" summary="initial commit">
       <option name="closed" value="true" />
@@ -65,7 +105,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717336753398</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="initial commit">
+      <option name="closed" value="true" />
+      <created>1717336770631</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1717336770631</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
