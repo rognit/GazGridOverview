@@ -1,36 +1,8 @@
-import pandas as pd
-import json
 import customtkinter
 from tkintermapview import TkinterMapView
 
 customtkinter.set_default_color_theme("blue")
 
-# Load the CSV file
-csv_file = 'resources/grt.csv'
-df = pd.read_csv(csv_file, delimiter=';')
-
-# Function to extract coordinates from the geo_shape column
-def extract_coordinates(geo_shape):
-    geo_shape_dict = json.loads(geo_shape)
-    coordinates = geo_shape_dict['coordinates']
-    swapped_coordinates = [(lat, lon) for lon, lat in coordinates]
-    return swapped_coordinates
-
-# Apply the function to the geo_shape column to create a new coordinates column
-df['coordinates'] = df['geo_shape'].apply(extract_coordinates)
-
-# Create a dictionary of DataFrames, one for each region
-regions = df['nom_region'].unique()
-region_dfs = {region: df[df['nom_region'] == region] for region in regions}
-
-# Create a dictionary to store the number of sections for each region
-region_counts = {region: len(region_dfs[region]) for region in regions}
-
-# Create a dictionary to store the display names for the dropdown menu
-region_display_names = {region: f"{region} ({count})" for region, count in region_counts.items()}
-
-# Reverse the dictionary for easy lookup during region selection
-display_to_region = {v: k for k, v in region_display_names.items()}
 
 class App(customtkinter.CTk):
 
@@ -68,12 +40,6 @@ class App(customtkinter.CTk):
 
         self.frame_left.grid_rowconfigure(0, weight=1)
         self.frame_left.grid_rowconfigure(1, weight=1)
-
-        self.region_label = customtkinter.CTkLabel(self.frame_left, text="Region:", anchor="w")
-        self.region_label.grid(row=0, column=0, padx=(20, 20), pady=(20, 0))
-        self.region_option_menu = customtkinter.CTkOptionMenu(self.frame_left, values=list(region_display_names.values()),
-                                                              command=self.change_region)
-        self.region_option_menu.grid(row=1, column=0, padx=(20, 20), pady=(10, 0))
 
         self.map_label = customtkinter.CTkLabel(self.frame_left, text="Tile Server:", anchor="w")
         self.map_label.grid(row=2, column=0, padx=(20, 20), pady=(20, 0))
@@ -113,10 +79,6 @@ class App(customtkinter.CTk):
         self.map_widget.set_address("Berlin")
         self.map_option_menu.set("OpenStreetMap")
         self.appearance_mode_optionemenu.set("Dark")
-        self.region_option_menu.set("Bretagne (20)")  # Example default value
-
-        # Initial region display
-        self.change_region("Bretagne (20)")  # Example default value
 
     def search_event(self, event=None):
         self.map_widget.set_address(self.entry.get())
@@ -139,13 +101,6 @@ class App(customtkinter.CTk):
             self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
         elif new_map == "Google satellite":
             self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
-
-    def change_region(self, display_name):
-        region = display_to_region[display_name]
-        self.map_widget.delete_all_path()
-        for index, row in region_dfs[region].iterrows():
-            coordinates = row['coordinates']
-            self.map_widget.set_path(coordinates)
 
     def on_closing(self, event=0):
         self.destroy()

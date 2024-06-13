@@ -29,6 +29,9 @@ region_counts = {region: len(region_dfs[region]) for region in regions}
 # Create a dictionary to store the display names for the dropdown menu
 region_display_names = {region: f"{region} ({count})" for region, count in region_counts.items()}
 
+# Add the "-----Empty----- (0)" option
+region_display_names["-----Empty-----"] = "-----Empty----- (0)"
+
 # Reverse the dictionary for easy lookup during region selection
 display_to_region = {v: k for k, v in region_display_names.items()}
 
@@ -66,8 +69,13 @@ class App(customtkinter.CTk):
 
         # ============ frame_left ============
 
-        self.frame_left.grid_rowconfigure(0, weight=1)
-        self.frame_left.grid_rowconfigure(1, weight=1)
+        self.frame_left.grid_rowconfigure(0, weight=0)
+        self.frame_left.grid_rowconfigure(1, weight=0)
+        self.frame_left.grid_rowconfigure(2, weight=0)
+        self.frame_left.grid_rowconfigure(3, weight=0)
+        self.frame_left.grid_rowconfigure(4, weight=0)
+        self.frame_left.grid_rowconfigure(5, weight=0)
+        self.frame_left.grid_rowconfigure(6, weight=1)  # This will push the widgets to the top
 
         self.region_label = customtkinter.CTkLabel(self.frame_left, text="Region:", anchor="w")
         self.region_label.grid(row=0, column=0, padx=(20, 20), pady=(20, 0))
@@ -113,10 +121,10 @@ class App(customtkinter.CTk):
         self.map_widget.set_address("Berlin")
         self.map_option_menu.set("OpenStreetMap")
         self.appearance_mode_optionemenu.set("Dark")
-        self.region_option_menu.set("Bretagne (20)")  # Example default value
+        self.region_option_menu.set("-----Empty----- (0)")
 
         # Initial region display
-        self.change_region("Bretagne (20)")  # Example default value
+        self.change_region("-----Empty----- (0)")
 
     def search_event(self, event=None):
         self.map_widget.set_address(self.entry.get())
@@ -135,14 +143,16 @@ class App(customtkinter.CTk):
     def change_map(self, new_map: str):
         if new_map == "OpenStreetMap":
             self.map_widget.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
-        elif new_map == "Google normal":
+        elif new_map == "Google Map (classic)":
             self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
-        elif new_map == "Google satellite":
+        elif new_map == "Google Map (satellite)":
             self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
 
     def change_region(self, display_name):
-        region = display_to_region[display_name]
         self.map_widget.delete_all_path()
+        if display_name == "-----Empty----- (0)":
+            return
+        region = display_to_region[display_name]
         for index, row in region_dfs[region].iterrows():
             coordinates = row['coordinates']
             self.map_widget.set_path(coordinates)

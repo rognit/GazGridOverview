@@ -1,73 +1,47 @@
 import pandas as pd
 import json
-import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
 import tkinter as tk
-from tkinter import filedialog, messagebox
+import tkintermapview
 
 # Load the CSV file
-csv_file = 'resources/terega.csv'
-data = pd.read_csv(csv_file, delimiter=';')
+csv_file = 'resources/grt.csv'
+df = pd.read_csv(csv_file, delimiter=';')
 
-# Process the 'geo_point_2d' column
-data['lat'] = data['geo_point_2d'].apply(lambda x: float(str(x).split(',')[0]))
-data['lon'] = data['geo_point_2d'].apply(lambda x: float(str(x).split(',')[1]))
-
-
-# Process the 'geo_shape' column
+# Function to extract coordinates from the geo_shape column
 def extract_coordinates(geo_shape):
-    if isinstance(geo_shape, str):
-        try:
-            coordinates = json.loads(geo_shape)['coordinates']
-            if isinstance(coordinates, list) and all(isinstance(coord, list) for coord in coordinates):
-                return [(coord[1], coord[0]) for coord in coordinates if len(coord) >= 2]
-        except (json.JSONDecodeError, KeyError):
-            return None
-    return None
+    geo_shape_dict = json.loads(geo_shape)
+    coordinates = geo_shape_dict['coordinates']
+    swapped_coordinates = [(lat, lon) for lon, lat in coordinates]
+    return swapped_coordinates
 
+# Apply the function to the geo_shape column to create a new coordinates column
+df['coordinates'] = df['geo_shape'].apply(extract_coordinates)
 
-data['coordinates'] = data['geo_shape'].apply(extract_coordinates)
+# Create a dictionary of DataFrames, one for each region
+regions = df['nom_region'].unique()
+region_dfs = {region: df[df['nom_region'] == region] for region in regions}
 
-# Filter out rows with invalid coordinates
-data = data.dropna(subset=['coordinates'])
-
-
-def plot_gas_network(data):
-    fig, ax = plt.subplots(figsize=(10, 8))
-    m = Basemap(projection='lcc', resolution='h',
-                lat_0=46.5, lon_0=2.5,
-                width=1.5E6, height=2.2E6, ax=ax)
-
-    m.shadedrelief()
-    m.drawcoastlines()
-    m.drawcountries()
-    m.drawparallels(range(40, 60, 1), labels=[1, 0, 0, 0])
-    m.drawmeridians(range(-5, 10, 2), labels=[0, 0, 0, 1])
-
-    # Plot each set of coordinates
-    for coords in data['coordinates']:
-        if coords:  # Ensure coords is not None
-            lats, lons = zip(*coords)
-            if all(isinstance(lat, float) for lat in lats) and all(isinstance(lon, float) for lon in lons):
-                x, y = m(lons, lats)
-                m.plot(x, y, marker='o', markersize=2, linewidth=1, color='r')
-
-    plt.title('Gas Network in Mainland France')
-    plt.show()
-
-
-# Tkinter GUI
-def on_show_map():
-    plot_gas_network(data)
-
+# Function to update the map based on the selected region
+def update_map(region):
+    map_widget.delete_all_path()
+    for index, row in region_dfs[region].iterrows():
+        coordinates = row['coordinates']
+        map_widget.set_path(coordinates)
 
 # Create the main Tkinter window
-root = tk.Tk()
-root.title("Gas Network Map")
+root_tk = tk.Tk()
+root_tk.geometry(f"{1000}x{700}")
+root_tk.title("Map View by Region")
 
-# Add a button to display the map
-btn_show_map = tk.Button(root, text="Show Map", command=on_show_map)
-btn_show_map.pack(pady=20)
+# Initialize the map widget with Open Street Map
+map_widget = tkintermapview.TkinterMapView(root_tk, width=1000, height=700)
+map_widget.pack(fill="both", expand=True)
+
+# Set the initial map position and zoom level
+map_widget.set_position(47, 2.5, marker=False)
+map_widget.set_zoom(6)
+
+update_map("Bretagne")
 
 # Start the Tkinter main loop
-root.mainloop()
+root_tk.mainloop()
