@@ -69,35 +69,36 @@ class App(customtkinter.CTk):
         # ============ frame_left ============
 
         self.frame_left.grid_rowconfigure(0, weight=0)
-        self.frame_left.grid_rowconfigure(1, weight=0)
-        self.frame_left.grid_rowconfigure(2, weight=1)
+        self.frame_left.grid_rowconfigure(1, weight=1)  # Allocate weight to row 1 for checkboxes
+        self.frame_left.grid_rowconfigure(2, weight=0)
         self.frame_left.grid_rowconfigure(3, weight=0)
         self.frame_left.grid_rowconfigure(4, weight=0)
-        self.frame_left.grid_rowconfigure(5, weight=0)
-        self.frame_left.grid_rowconfigure(6, weight=0)
 
         self.region_label = customtkinter.CTkLabel(self.frame_left, text="Regions:", anchor="w")
         self.region_label.grid(row=0, column=0, padx=(20, 20), pady=(20, 0))
 
+        self.region_frame = customtkinter.CTkFrame(self.frame_left, fg_color=None)
+        self.region_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 0), sticky="n")
+
         self.region_checkboxes = {}
-        for idx, (region, display_name) in enumerate(region_display_names.items(), start=1):
-            self.region_checkboxes[region] = customtkinter.CTkCheckBox(self.frame_left, text=display_name,
+        for idx, (region, display_name) in enumerate(region_display_names.items()):
+            self.region_checkboxes[region] = customtkinter.CTkCheckBox(self.region_frame, text=display_name,
                                                                        command=self.change_region)
-            self.region_checkboxes[region].grid(row=idx, column=0, padx=(20, 20), pady=(10, 0))
+            self.region_checkboxes[region].grid(row=idx, column=0, padx=(0, 0), pady=(5, 0), sticky="w")
 
         self.map_label = customtkinter.CTkLabel(self.frame_left, text="Background:", anchor="w")
-        self.map_label.grid(row=len(region_display_names) + 1, column=0, padx=(20, 20), pady=(20, 0))
+        self.map_label.grid(row=2, column=0, padx=(20, 20), pady=(20, 0))
         self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left, values=["OpenStreetMap", "Google normal",
                                                                                     "Google satellite"],
                                                            command=self.change_map)
-        self.map_option_menu.grid(row=len(region_display_names) + 2, column=0, padx=(20, 20), pady=(10, 0))
+        self.map_option_menu.grid(row=3, column=0, padx=(20, 20), pady=(10, 0))
 
         self.appearance_mode_label = customtkinter.CTkLabel(self.frame_left, text="Appearance:", anchor="w")
-        self.appearance_mode_label.grid(row=len(region_display_names) + 3, column=0, padx=(20, 20), pady=(20, 0))
+        self.appearance_mode_label.grid(row=4, column=0, padx=(20, 20), pady=(20, 0))
         self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.frame_left,
                                                                        values=["Light", "Dark", "System"],
                                                                        command=self.change_appearance_mode)
-        self.appearance_mode_optionemenu.grid(row=len(region_display_names) + 4, column=0, padx=(20, 20), pady=(10, 20))
+        self.appearance_mode_optionemenu.grid(row=5, column=0, padx=(20, 20), pady=(10, 20))
 
         # ============ frame_right ============
 

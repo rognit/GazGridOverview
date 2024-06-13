@@ -9,14 +9,12 @@ customtkinter.set_default_color_theme("blue")
 csv_file = 'resources/grt.csv'
 df = pd.read_csv(csv_file, delimiter=';')
 
-
 # Function to extract coordinates from the geo_shape column
 def extract_coordinates(geo_shape):
     geo_shape_dict = json.loads(geo_shape)
     coordinates = geo_shape_dict['coordinates']
     swapped_coordinates = [(lat, lon) for lon, lat in coordinates]
     return swapped_coordinates
-
 
 # Apply the function to the geo_shape column to create a new coordinates column
 df['coordinates'] = df['geo_shape'].apply(extract_coordinates)
@@ -31,11 +29,14 @@ region_counts = {region: len(region_dfs[region]) for region in regions}
 # Create a dictionary to store the display names for the dropdown menu
 region_display_names = {region: f"{region} ({count})" for region, count in region_counts.items()}
 
+# Add the "-----Empty----- (0)" option
+region_display_names["-----Empty-----"] = "-----Empty----- (0)"
+
 # Reverse the dictionary for easy lookup during region selection
 display_to_region = {v: k for k, v in region_display_names.items()}
 
-
 class App(customtkinter.CTk):
+
     APP_NAME = "French gaz network overview"
     WIDTH = 800
     HEIGHT = 500
@@ -76,28 +77,23 @@ class App(customtkinter.CTk):
         self.frame_left.grid_rowconfigure(5, weight=0)
         self.frame_left.grid_rowconfigure(6, weight=0)
 
-        self.region_label = customtkinter.CTkLabel(self.frame_left, text="Regions:", anchor="w")
+        self.region_label = customtkinter.CTkLabel(self.frame_left, text="Region:", anchor="w")
         self.region_label.grid(row=0, column=0, padx=(20, 20), pady=(20, 0))
-
-        self.region_checkboxes = {}
-        for idx, (region, display_name) in enumerate(region_display_names.items(), start=1):
-            self.region_checkboxes[region] = customtkinter.CTkCheckBox(self.frame_left, text=display_name,
-                                                                       command=self.change_region)
-            self.region_checkboxes[region].grid(row=idx, column=0, padx=(20, 20), pady=(10, 0))
+        self.region_option_menu = customtkinter.CTkOptionMenu(self.frame_left, values=list(region_display_names.values()),
+                                                              command=self.change_region)
+        self.region_option_menu.grid(row=1, column=0, padx=(20, 20), pady=(10, 0))
 
         self.map_label = customtkinter.CTkLabel(self.frame_left, text="Background:", anchor="w")
-        self.map_label.grid(row=len(region_display_names) + 1, column=0, padx=(20, 20), pady=(20, 0))
-        self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left, values=["OpenStreetMap", "Google normal",
-                                                                                    "Google satellite"],
+        self.map_label.grid(row=3, column=0, padx=(20, 20), pady=(20, 0))
+        self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left, values=["OpenStreetMap", "Google normal", "Google satellite"],
                                                            command=self.change_map)
-        self.map_option_menu.grid(row=len(region_display_names) + 2, column=0, padx=(20, 20), pady=(10, 0))
+        self.map_option_menu.grid(row=4, column=0, padx=(20, 20), pady=(10, 0))
 
         self.appearance_mode_label = customtkinter.CTkLabel(self.frame_left, text="Appearance:", anchor="w")
-        self.appearance_mode_label.grid(row=len(region_display_names) + 3, column=0, padx=(20, 20), pady=(20, 0))
-        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.frame_left,
-                                                                       values=["Light", "Dark", "System"],
+        self.appearance_mode_label.grid(row=5, column=0, padx=(20, 20), pady=(20, 0))
+        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.frame_left, values=["Light", "Dark", "System"],
                                                                        command=self.change_appearance_mode)
-        self.appearance_mode_optionemenu.grid(row=len(region_display_names) + 4, column=0, padx=(20, 20), pady=(10, 20))
+        self.appearance_mode_optionemenu.grid(row=6, column=0, padx=(20, 20), pady=(10, 20))
 
         # ============ frame_right ============
 
@@ -126,6 +122,10 @@ class App(customtkinter.CTk):
         self.map_widget.set_zoom(6)
         self.map_option_menu.set("OpenStreetMap")
         self.appearance_mode_optionemenu.set("System")
+        self.region_option_menu.set("-----Empty----- (0)")
+
+        # Initial region display
+        self.change_region("-----Empty----- (0)")
 
     def search_event(self, event=None):
         self.map_widget.set_address(self.entry.get())
@@ -145,19 +145,18 @@ class App(customtkinter.CTk):
         if new_map == "OpenStreetMap":
             self.map_widget.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
         elif new_map == "Google Map (classic)":
-            self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga",
-                                            max_zoom=22)
+            self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
         elif new_map == "Google Map (satellite)":
-            self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga",
-                                            max_zoom=22)
+            self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
 
-    def change_region(self):
+    def change_region(self, display_name):
         self.map_widget.delete_all_path()
-        for region, checkbox in self.region_checkboxes.items():
-            if checkbox.get():
-                for index, row in region_dfs[region].iterrows():
-                    coordinates = row['coordinates']
-                    self.map_widget.set_path(coordinates)
+        if display_name == "-----Empty----- (0)":
+            return
+        region = display_to_region[display_name]
+        for index, row in region_dfs[region].iterrows():
+            coordinates = row['coordinates']
+            self.map_widget.set_path(coordinates)
 
     def on_closing(self, event=0):
         self.destroy()
