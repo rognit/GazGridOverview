@@ -6,7 +6,7 @@ from tkintermapview import TkinterMapView
 customtkinter.set_default_color_theme("blue")
 
 # Load the CSV file
-csv_file = 'resources/grt.csv'
+csv_file = '../resources/grt.csv'
 df = pd.read_csv(csv_file, delimiter=';')
 
 # Function to extract coordinates from the geo_shape column
