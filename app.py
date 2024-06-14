@@ -1,38 +1,4 @@
-import pandas as pd
-import json
 import customtkinter
-from tkintermapview import TkinterMapView
-
-customtkinter.set_default_color_theme("blue")
-
-# Load the CSV file
-csv_file = 'resources/grt.csv'
-df = pd.read_csv(csv_file, delimiter=';')
-
-
-# Function to extract coordinates from the geo_shape column
-def extract_coordinates(geo_shape):
-    geo_shape_dict = json.loads(geo_shape)
-    coordinates = geo_shape_dict['coordinates']
-    swapped_coordinates = [(lat, lon) for lon, lat in coordinates]
-    return swapped_coordinates
-
-
-# Apply the function to the geo_shape column to create a new coordinates column
-df['coordinates'] = df['geo_shape'].apply(extract_coordinates)
-
-# Create a dictionary of DataFrames, one for each region
-regions = df['nom_region'].unique()
-region_dfs = {region: df[df['nom_region'] == region] for region in regions}
-
-# Create a dictionary to store the number of sections for each region
-region_counts = {region: len(region_dfs[region]) for region in regions}
-
-# Create a dictionary to store the display names for the dropdown menu
-region_display_names = {region: f"{region} ({count})" for region, count in region_counts.items()}
-
-# Reverse the dictionary for easy lookup during region selection
-display_to_region = {v: k for k, v in region_display_names.items()}
 
 
 class App(customtkinter.CTk):
@@ -69,40 +35,54 @@ class App(customtkinter.CTk):
         # ============ frame_left ============
 
         self.frame_left.grid_rowconfigure(0, weight=0)
-        self.frame_left.grid_rowconfigure(1, weight=1)  # Allocate weight to row 1 for checkboxes
+        self.frame_left.grid_rowconfigure(1, weight=0)  # Adjusted row weight for GRTgaz checkboxes
         self.frame_left.grid_rowconfigure(2, weight=0)
-        self.frame_left.grid_rowconfigure(3, weight=0)
-        self.frame_left.grid_rowconfigure(4, weight=0)
+        self.frame_left.grid_rowconfigure(3, weight=0)  # Adjusted row weight for Terega checkboxes
+        self.frame_left.grid_rowconfigure(4, weight=1)  # Spacer to push dropdowns to the bottom
         self.frame_left.grid_rowconfigure(5, weight=0)
+        self.frame_left.grid_rowconfigure(6, weight=0)
         self.frame_left.grid_columnconfigure(0, weight=1)
         self.frame_left.grid_columnconfigure(1, weight=1)
 
-        self.region_label = customtkinter.CTkLabel(self.frame_left, text="GRTgaz Network:", anchor="w")
-        self.region_label.grid(row=0, column=0, padx=(20, 20), pady=(20, 0))
+        self.region_label_grt = customtkinter.CTkLabel(self.frame_left, text="GRTgaz Network:", anchor="w")
+        self.region_label_grt.grid(row=0, column=0, padx=(20, 20), pady=(20, 0))
 
-        self.region_frame = customtkinter.CTkFrame(self.frame_left, fg_color=None)
-        self.region_frame.grid(row=1, column=0, columnspan=2, padx=(20, 20), pady=(10, 0), sticky="n")
+        self.region_frame_grt = customtkinter.CTkFrame(self.frame_left, fg_color=None)
+        self.region_frame_grt.grid(row=1, column=0, columnspan=2, padx=(20, 20), pady=(10, 0), sticky="n")
 
-        self.region_checkboxes = {}
-        for idx, (region, display_name) in enumerate(region_display_names.items()):
-            self.region_checkboxes[region] = customtkinter.CTkCheckBox(self.region_frame, text=display_name,
-                                                                       command=self.change_region)
-            self.region_checkboxes[region].grid(row=idx, column=0, padx=(0, 0), pady=(5, 0), sticky="w")
+        self.region_checkboxes_grt = {}
+        for idx, (region, display_name) in enumerate(region_display_names_grt.items()):
+            self.region_checkboxes_grt[region] = customtkinter.CTkCheckBox(self.region_frame_grt, text=display_name,
+                                                                           command=self.change_region)
+            self.region_checkboxes_grt[region].grid(row=idx, column=0, padx=(0, 0), pady=(5, 0), sticky="w")
+
+        self.region_label_terega = customtkinter.CTkLabel(self.frame_left, text="Terega Network:", anchor="w")
+        self.region_label_terega.grid(row=2, column=0, padx=(20, 20), pady=(20, 0))
+
+        self.region_frame_terega = customtkinter.CTkFrame(self.frame_left, fg_color=None)
+        self.region_frame_terega.grid(row=3, column=0, columnspan=2, padx=(20, 20), pady=(10, 0), sticky="n")
+
+        self.region_checkboxes_terega = {}
+        for idx, (region, display_name) in enumerate(region_display_names_terega.items()):
+            self.region_checkboxes_terega[region] = customtkinter.CTkCheckBox(self.region_frame_terega,
+                                                                              text=display_name,
+                                                                              command=self.change_region)
+            self.region_checkboxes_terega[region].grid(row=idx, column=0, padx=(0, 0), pady=(5, 0), sticky="w")
 
         self.map_label = customtkinter.CTkLabel(self.frame_left, text="Background:", anchor="w")
-        self.map_label.grid(row=2, column=0, padx=(20, 0), pady=(20, 0))
+        self.map_label.grid(row=5, column=0, padx=(20, 0), pady=(20, 0))
         self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left, values=["OpenStreetMap",
                                                                                     "Google Map (classic)",
                                                                                     "Google Map (satellite)"],
                                                            command=self.change_map)
-        self.map_option_menu.grid(row=2, column=1, padx=(0, 20), pady=(20, 0))
+        self.map_option_menu.grid(row=5, column=1, padx=(0, 20), pady=(20, 0))
 
         self.appearance_mode_label = customtkinter.CTkLabel(self.frame_left, text="Appearance:", anchor="w")
-        self.appearance_mode_label.grid(row=3, column=0, padx=(20, 0), pady=(20, 0))
+        self.appearance_mode_label.grid(row=6, column=0, padx=(20, 0), pady=(20, 0))
         self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.frame_left,
                                                                        values=["Light", "Dark", "System"],
                                                                        command=self.change_appearance_mode)
-        self.appearance_mode_optionemenu.grid(row=3, column=1, padx=(0, 20), pady=(20, 0))
+        self.appearance_mode_optionemenu.grid(row=6, column=1, padx=(0, 20), pady=(20, 0))
 
         # ============ frame_right ============
 
@@ -158,9 +138,14 @@ class App(customtkinter.CTk):
 
     def change_region(self):
         self.map_widget.delete_all_path()
-        for region, checkbox in self.region_checkboxes.items():
+        for region, checkbox in self.region_checkboxes_grt.items():
             if checkbox.get():
-                for index, row in region_dfs[region].iterrows():
+                for index, row in region_dfs_grt[region].iterrows():
+                    coordinates = row['coordinates']
+                    self.map_widget.set_path(coordinates)
+        for region, checkbox in self.region_checkboxes_terega.items():
+            if checkbox.get():
+                for index, row in region_dfs_terega[region].iterrows():
                     coordinates = row['coordinates']
                     self.map_widget.set_path(coordinates)
 
@@ -169,8 +154,3 @@ class App(customtkinter.CTk):
 
     def start(self):
         self.mainloop()
-
-
-if __name__ == "__main__":
-    app = App()
-    app.start()
