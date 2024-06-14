@@ -208,18 +208,19 @@ class App(customtkinter.CTk):
             if checkbox.get():
                 for index, row in region_dfs_grt[region].iterrows():
                     coordinates = row['coordinates']
-                    self.map_widget.set_path(coordinates)
+                    self.map_widget.set_path(coordinates, color="blue")
         for region, checkbox in self.region_checkboxes_terega.items():
             if checkbox.get():
                 for index, row in region_dfs_terega[region].iterrows():
                     coordinates = row['coordinates']
-                    self.map_widget.set_path(coordinates)
+                    self.map_widget.set_path(coordinates, color="green")
 
     def on_closing(self, event=0):
         self.destroy()
 
     def start(self):
         self.mainloop()
+
 
 
 
