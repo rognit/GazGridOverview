@@ -4,14 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f4a90caf-4d97-4a9d-b34e-600a4848a2a5" name="Changes" comment="New architecture">
-      <change afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/insee_filter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/backend/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/frontend/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" />
+    <list default="true" id="f4a90caf-4d97-4a9d-b34e-600a4848a2a5" name="Changes" comment="Insee beginning">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/insee_filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/insee_filter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test1.py" beforeDir="false" afterPath="$PROJECT_DIR$/test1.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test3.py" beforeDir="false" afterPath="$PROJECT_DIR$/test3.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,35 +49,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "JavaScript Debug.TkinterMapView_examples_images at main · TomSchimansky_TkinterMapView · GitHub.html.executor": "Run",
-    "Python.demo.executor": "Run",
-    "Python.demo1.executor": "Run",
-    "Python.demo2.executor": "Run",
-    "Python.demo3.executor": "Run",
-    "Python.demo4.executor": "Run",
-    "Python.demo5.executor": "Run",
-    "Python.exemple.executor": "Run",
-    "Python.insee_filter.executor": "Run",
-    "Python.load_data.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.test 2.executor": "Run",
-    "Python.test1.executor": "Run",
-    "Python.test3.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/Pierre/PycharmProjects/GazGridOverview",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "Csv.Editor.Settings",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;JavaScript Debug.TkinterMapView_examples_images at main · TomSchimansky_TkinterMapView · GitHub.html.executor&quot;: &quot;Run&quot;,
+    &quot;Python.demo.executor&quot;: &quot;Run&quot;,
+    &quot;Python.demo1.executor&quot;: &quot;Run&quot;,
+    &quot;Python.demo2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.demo3.executor&quot;: &quot;Run&quot;,
+    &quot;Python.demo4.executor&quot;: &quot;Run&quot;,
+    &quot;Python.demo5.executor&quot;: &quot;Run&quot;,
+    &quot;Python.exemple.executor&quot;: &quot;Run&quot;,
+    &quot;Python.insee_filter.executor&quot;: &quot;Run&quot;,
+    &quot;Python.load_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test 2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test1.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test3.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Pierre/PycharmProjects/GazGridOverview&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;Csv.Editor.Settings&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Pierre\PycharmProjects\GazGridOverview\demos (legacy)" />
@@ -139,6 +135,7 @@
       <workItem from="1717439229522" duration="80000" />
       <workItem from="1717439318982" duration="299000" />
       <workItem from="1718308875485" duration="31378000" />
+      <workItem from="1718774699532" duration="4817000" />
     </task>
     <task id="LOCAL-00001" summary="initial commit">
       <option name="closed" value="true" />
@@ -212,7 +209,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718358555138</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Insee beginning">
+      <option name="closed" value="true" />
+      <created>1718774798032</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1718774798032</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -238,10 +243,11 @@
     <MESSAGE value="Terega in green" />
     <MESSAGE value="Terega in green" />
     <MESSAGE value="New architecture" />
-    <option name="LAST_COMMIT_MESSAGE" value="New architecture" />
+    <MESSAGE value="Insee beginning" />
+    <option name="LAST_COMMIT_MESSAGE" value="Insee beginning" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/GazGridOverview$test1.coverage" NAME="test1 Coverage Results" MODIFIED="1718362666213" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/GazGridOverview$test1.coverage" NAME="test1 Coverage Results" MODIFIED="1718953419402" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/GazGridOverview$test_2.coverage" NAME="test 2 Coverage Results" MODIFIED="1718322309132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/GazGridOverview$insee_filter.coverage" NAME="insee_filter Coverage Results" MODIFIED="1718359793705" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/GazGridOverview$demo3.coverage" NAME="demo3 Coverage Results" MODIFIED="1718363018813" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/demos (legacy)" />
