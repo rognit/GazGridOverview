@@ -19,13 +19,11 @@ print(f"north: {north}, East: {east}")
 pop_df = pd.read_csv('../resources/test_pop_filtered.csv')
 
 
-
 def add_color_to_edges(buffer_distance=200,
                        square_size=200,
                        square_size_squared=40000,
                        orange_threshold=300,
                        red_threshold=3000, ):
-
     def get_density(x, y):
         return pop_df.loc[(pop_df['north'] == y) & (pop_df['east'] == x), 'density'].values[0]
 
@@ -34,7 +32,6 @@ def add_color_to_edges(buffer_distance=200,
 
     def get_square(x, y):
         return round_down_to_nearest(x), round_down_to_nearest(y)
-
 
     def get_colors_from_section(section):
 
@@ -81,8 +78,6 @@ def add_color_to_edges(buffer_distance=200,
                          x2 + buffer_distance * xn2,
                          y2 + buffer_distance * yn2))
 
-
-
             (x1_l1, y1_l1, x2_l1, y2_l1), (x1_l2, y1_l2, x2_l2, y2_l2) = get_boundaries()
 
             edge_squares.update(get_squares_from_line(x1_l1, y1_l1, x2_l1, y2_l1))
@@ -92,7 +87,8 @@ def add_color_to_edges(buffer_distance=200,
             for i in range(1, number_of_lines):
                 offset_x = i * square_size * (x2_l1 - x1_l1) / length
                 offset_y = i * square_size * (y2_l1 - y1_l1) / length
-                edge_squares.update(get_squares_from_line(x1_l1 + offset_x, y1_l1 + offset_y, x2_l1 + offset_x, y2_l1 + offset_y))
+                edge_squares.update(
+                    get_squares_from_line(x1_l1 + offset_x, y1_l1 + offset_y, x2_l1 + offset_x, y2_l1 + offset_y))
 
             return edge_squares
 
@@ -107,7 +103,6 @@ def add_color_to_edges(buffer_distance=200,
                         (x_corner - square_size, y_corner),
                         (x_corner, y_corner - square_size),
                         (x_corner - square_size, y_corner - square_size))
-
 
             x_initial_square, y_initial_square = get_square(x, y)
             edge_corners = set()
@@ -132,5 +127,20 @@ def add_color_to_edges(buffer_distance=200,
 
             return edge_squares
 
+        def get_color_from_squares(squares):
+            max_density = max([get_density(x, y) for x, y in squares])
+            if max_density < orange_threshold:
+                return 'green'
+            elif max_density < red_threshold:
+                return 'orange'
+            else:
+                return 'red'
 
-
+        current_vertex_squares = get_square_from_vertex(section[0])
+        sub_section_colors = []
+        for vertex in section[1:]:
+            vertex_squares = get_square_from_vertex(vertex)
+            sub_section_squares = current_vertex_squares | get_squares_from_edge(vertex) | vertex_squares
+            current_vertex_squares = vertex_squares
+            sub_section_color = get_color_from_squares(sub_section_squares)
+            sub_section_colors.append(sub_section_color)
