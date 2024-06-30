@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f4a90caf-4d97-4a9d-b34e-600a4848a2a5" name="Changes" comment="Insee beginning">
+    <list default="true" id="f4a90caf-4d97-4a9d-b34e-600a4848a2a5" name="Changes" comment="insee filter: coordinates conversion">
+      <change afterPath="$PROJECT_DIR$/data/calculator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/gaz_network_filter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/insee_filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/insee_filter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test1.py" beforeDir="false" afterPath="$PROJECT_DIR$/test1.py" afterDir="false" />
@@ -52,6 +54,7 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;JavaScript Debug.TkinterMapView_examples_images at main · TomSchimansky_TkinterMapView · GitHub.html.executor&quot;: &quot;Run&quot;,
+    &quot;Python.calculator.executor&quot;: &quot;Run&quot;,
     &quot;Python.demo.executor&quot;: &quot;Run&quot;,
     &quot;Python.demo1.executor&quot;: &quot;Run&quot;,
     &quot;Python.demo2.executor&quot;: &quot;Run&quot;,
@@ -59,6 +62,7 @@
     &quot;Python.demo4.executor&quot;: &quot;Run&quot;,
     &quot;Python.demo5.executor&quot;: &quot;Run&quot;,
     &quot;Python.exemple.executor&quot;: &quot;Run&quot;,
+    &quot;Python.gaz_network_filter.executor&quot;: &quot;Run&quot;,
     &quot;Python.insee_filter.executor&quot;: &quot;Run&quot;,
     &quot;Python.load_data.executor&quot;: &quot;Run&quot;,
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
@@ -68,7 +72,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Pierre/PycharmProjects/GazGridOverview&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Pierre/PycharmProjects/Template LLM&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -80,6 +84,7 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Pierre\PycharmProjects\GazGridOverview\resources\raw" />
       <recent name="C:\Users\Pierre\PycharmProjects\GazGridOverview\demos (legacy)" />
       <recent name="C:\Users\Pierre\PycharmProjects\GazGridOverview" />
     </key>
@@ -135,7 +140,9 @@
       <workItem from="1717439229522" duration="80000" />
       <workItem from="1717439318982" duration="299000" />
       <workItem from="1718308875485" duration="31378000" />
-      <workItem from="1718774699532" duration="4817000" />
+      <workItem from="1718774699532" duration="16124000" />
+      <workItem from="1719250904172" duration="8702000" />
+      <workItem from="1719734814830" duration="2658000" />
     </task>
     <task id="LOCAL-00001" summary="initial commit">
       <option name="closed" value="true" />
@@ -217,7 +224,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718774798032</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="insee filter: coordinates conversion">
+      <option name="closed" value="true" />
+      <created>1718954981603</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1718954981603</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -244,22 +259,25 @@
     <MESSAGE value="Terega in green" />
     <MESSAGE value="New architecture" />
     <MESSAGE value="Insee beginning" />
-    <option name="LAST_COMMIT_MESSAGE" value="Insee beginning" />
+    <MESSAGE value="insee filter: coordinates conversion" />
+    <option name="LAST_COMMIT_MESSAGE" value="insee filter: coordinates conversion" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/GazGridOverview$test1.coverage" NAME="test1 Coverage Results" MODIFIED="1718953419402" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/GazGridOverview$test1.coverage" NAME="test1 Coverage Results" MODIFIED="1719736927791" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/GazGridOverview$calculator.coverage" NAME="calculator Coverage Results" MODIFIED="1719337070116" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/GazGridOverview$test_2.coverage" NAME="test 2 Coverage Results" MODIFIED="1718322309132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/GazGridOverview$insee_filter.coverage" NAME="insee_filter Coverage Results" MODIFIED="1718359793705" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/GazGridOverview$demo3.coverage" NAME="demo3 Coverage Results" MODIFIED="1718363018813" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/demos (legacy)" />
+    <SUITE FILE_PATH="coverage/GazGridOverview$insee_filter.coverage" NAME="insee_filter Coverage Results" MODIFIED="1719336379083" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/GazGridOverview$exemple.coverage" NAME="exemple Coverage Results" MODIFIED="1717758932227" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/GazGridOverview$demo.coverage" NAME="demo Coverage Results" MODIFIED="1718312729790" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/GazGridOverview$demo1.coverage" NAME="demo1 Coverage Results" MODIFIED="1718362940807" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/demos (legacy)" />
     <SUITE FILE_PATH="coverage/GazGridOverview$load_data.coverage" NAME="load_data Coverage Results" MODIFIED="1718362131808" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/GazGridOverview$demo4.coverage" NAME="demo4 Coverage Results" MODIFIED="1718363076282" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/demos (legacy)" />
-    <SUITE FILE_PATH="coverage/GazGridOverview$main.coverage" NAME="main Coverage Results" MODIFIED="1718386355268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/GazGridOverview$main.coverage" NAME="main Coverage Results" MODIFIED="1719736559296" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/GazGridOverview$test3.coverage" NAME="test3 Coverage Results" MODIFIED="1718362314731" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/GazGridOverview$main__2_.coverage" NAME="main (2) Coverage Results" MODIFIED="1717443489790" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/GazGridOverview$demo5.coverage" NAME="demo5 Coverage Results" MODIFIED="1718363114153" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/demos (legacy)" />
     <SUITE FILE_PATH="coverage/GazGridOverview$demo2.coverage" NAME="demo2 Coverage Results" MODIFIED="1718362963592" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/demos (legacy)" />
+    <SUITE FILE_PATH="coverage/GazGridOverview$gaz_network_filter.coverage" NAME="gaz_network_filter Coverage Results" MODIFIED="1719253396040" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
   </component>
 </project>
