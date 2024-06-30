@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f4a90caf-4d97-4a9d-b34e-600a4848a2a5" name="Changes" comment="calculator">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/calculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/calculator.py" afterDir="false" />
-    </list>
+    <list default="true" id="f4a90caf-4d97-4a9d-b34e-600a4848a2a5" name="Changes" comment="calculator: edges &amp; vertices" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -140,7 +137,7 @@
       <workItem from="1718774699532" duration="16124000" />
       <workItem from="1719250904172" duration="8702000" />
       <workItem from="1719734814830" duration="2658000" />
-      <workItem from="1719761332054" duration="7347000" />
+      <workItem from="1719761332054" duration="7933000" />
     </task>
     <task id="LOCAL-00001" summary="initial commit">
       <option name="closed" value="true" />
@@ -238,7 +235,15 @@
       <option name="project" value="LOCAL" />
       <updated>1719761430357</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="calculator: edges &amp; vertices">
+      <option name="closed" value="true" />
+      <created>1719769446102</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1719769446102</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -267,7 +272,8 @@
     <MESSAGE value="Insee beginning" />
     <MESSAGE value="insee filter: coordinates conversion" />
     <MESSAGE value="calculator" />
-    <option name="LAST_COMMIT_MESSAGE" value="calculator" />
+    <MESSAGE value="calculator: edges &amp; vertices" />
+    <option name="LAST_COMMIT_MESSAGE" value="calculator: edges &amp; vertices" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/GazGridOverview$test1.coverage" NAME="test1 Coverage Results" MODIFIED="1719736927791" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
