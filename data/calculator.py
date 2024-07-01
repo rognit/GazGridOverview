@@ -1,6 +1,7 @@
 import math
 import json
 import pandas as pd
+from tqdm import tqdm
 from pyproj import CRS, Transformer
 
 
@@ -9,10 +10,9 @@ def add_color_to_edges(buffer_distance=200,
                        orange_threshold=300,
                        red_threshold=3000):
 
-    square_size_squared = square_size ** 2
-
-    pop_df = pd.read_csv('../resources/test_pop_filtered.csv')
     gaz_df = pd.read_csv('../resources/gaz_network.csv')
+    pop_df = pd.read_csv('../resources/pop_filtered.csv')
+    pop_df.set_index(['north', 'east'], inplace=True)
 
     crs3035 = CRS('EPSG:3035')
     wgs84 = CRS('EPSG:4326')
@@ -20,26 +20,34 @@ def add_color_to_edges(buffer_distance=200,
 
     # to_wgs = Transformer.from_crs(crs3035, wgs84)
     # north, east = 2869000, 3466600
-    # long, lat = to_wgs.transform(north, east)
-    # north, east = to_crs.transform(long, lat)
+    # lat, lon = to_wgs.transform(north, east)
+    # (48.329768832956944 -1.5720923688546355)
+    # north, east = to_crs.transform(lon, lat)
 
-    def get_density(x, y):
-        return pop_df.loc[(pop_df['north'] == y) & (pop_df['east'] == x), 'density'].values[0]
+    def get_density(east, north):
+        try:
+            return pop_df.loc[(north, east), 'density']
+        except KeyError:
+            return 0
 
     def round_down_to_nearest(value):
-        return int(value // square_size_squared)
+        return int(value // square_size * square_size)
 
     def get_square(x, y):
         return round_down_to_nearest(x), round_down_to_nearest(y)
 
-    def get_colors_from_section(geoshape):
+    def swap_lat_lon(coordinates):
+        return [(lon, lat) for lat, lon in coordinates]
 
-        section = [to_crs.transform(*vertex) for vertex in json.loads(geoshape)["coordinates"]]
+    def get_colors_from_section(geoshape):
+        section = [to_crs.transform(*vertex) for vertex in swap_lat_lon(json.loads(geoshape)["coordinates"])]
 
         def get_squares_from_edge(x1, y1, x2, y2):
             dx, dy = x2 - x1, y2 - y1
-            length = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+            length = math.sqrt(dx ** 2 + dy ** 2)
             edge_squares = set()
+            if length == 0:
+                return edge_squares
 
             def get_line(x1_local, y1_local, x2_local, y2_local):
                 dx_local, dy_local = x2_local - x1_local, y2_local - y1_local
@@ -62,7 +70,7 @@ def add_color_to_edges(buffer_distance=200,
                         output_squares.append(get_square(crossed_north_square, east_square))
                     old_north_square = north_square
 
-                return list(set(output_squares))
+                return output_squares
 
             def get_boundaries():
                 # Normalized normal vectors
@@ -127,6 +135,7 @@ def add_color_to_edges(buffer_distance=200,
 
         def get_color_from_squares(squares):
             max_density = max(get_density(*square) for square in squares)
+            #(max_density)
             if max_density < orange_threshold:
                 return 'green'
             elif max_density < red_threshold:
@@ -136,7 +145,7 @@ def add_color_to_edges(buffer_distance=200,
 
         if len(section) == 0 or len(section) == 1:
             print(f"ERROR: Section has {len(section)} vertices")
-        
+        #print(section)
         old_vertex = section[0]
         old_vertex_squares = get_square_from_vertex(old_vertex)
         sub_section_colors = []
@@ -144,12 +153,18 @@ def add_color_to_edges(buffer_distance=200,
         for vertex in section[1:]:
             vertex_squares = get_square_from_vertex(vertex)
             sub_section_squares = old_vertex_squares | get_squares_from_edge(*old_vertex, *vertex) | vertex_squares
-            
+            #print("\nsub_section_squares", sub_section_squares, "\nold_vertex_squares", old_vertex_squares, "\nedge", get_squares_from_edge(*old_vertex, *vertex), "\nvertex_squares\n", vertex_squares)
+
             old_vertex = vertex
             old_vertex_squares = vertex_squares
 
             sub_section_colors.append(get_color_from_squares(sub_section_squares))
-
+        print(sub_section_colors)
         return sub_section_colors
 
-    gaz_df['length_km'] = gaz_df['geo_shape'].apply(get_colors_from_section)
+    tqdm.pandas()
+    gaz_df['section_colors'] = gaz_df['geo_shape'].progress_apply(get_colors_from_section)
+    gaz_df.to_csv('../resources/gaz_network_colored.csv', index=False)
+
+
+add_color_to_edges()
