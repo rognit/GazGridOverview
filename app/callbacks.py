@@ -7,17 +7,10 @@ def search_event(app, event=None):
 
 def change_region(app):
     app.map_widget.delete_all_path()
-    for region, checkbox in app.region_checkboxes_grt.items():
+    for region, checkbox in app.region_checkboxes_gaz.items():
         if checkbox.get():
-            for index, row in app.region_dfs_grt[region].iterrows():
-                coordinates = row['coordinates']
-                app.map_widget.set_path(coordinates, color="blue")
-    for region, checkbox in app.region_checkboxes_terega.items():
-        if checkbox.get():
-            for index, row in app.region_dfs_terega[region].iterrows():
-                coordinates = row['coordinates']
-                app.map_widget.set_path(coordinates, color="green")
-
+            for index, row in app.region_dfs_gaz[region].iterrows():
+                app.map_widget.set_path(row['coordinates'], color=row['color'])
 
 def change_map(app, new_map):
     if new_map == "OpenStreetMap":

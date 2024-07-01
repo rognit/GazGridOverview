@@ -159,11 +159,21 @@ def add_color_to_edges(buffer_distance=200,
             old_vertex_squares = vertex_squares
 
             sub_section_colors.append(get_color_from_squares(sub_section_squares))
-        print(sub_section_colors)
         return sub_section_colors
 
     tqdm.pandas()
     gaz_df['section_colors'] = gaz_df['geo_shape'].progress_apply(get_colors_from_section)
+
+    def worse_color(colors):
+        if 'red' in colors:
+            return 'red'
+        elif 'orange' in colors:
+            return 'orange'
+        else:
+            return 'green'
+
+    gaz_df['color'] = gaz_df['section_colors'].apply(worse_color)
+
     gaz_df.to_csv('../resources/gaz_network_colored.csv', index=False)
 
 

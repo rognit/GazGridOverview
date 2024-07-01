@@ -1,6 +1,6 @@
 import customtkinter
 from tkintermapview import TkinterMapView
-from data.load_data import load_grt_data, load_terega_data, extract_coordinates
+from data.load_data import load_gaz_data, extract_coordinates
 from app.callbacks import change_region, change_map, change_appearance_mode, search_event
 
 
@@ -20,13 +20,10 @@ class App(customtkinter.CTk):
         self.createcommand('tk::mac::Quit', self.on_closing)
         self.marker_list = []
 
-        self.df_grt = load_grt_data()
-        self.df_terega = load_terega_data()
+        self.df_gaz = load_gaz_data()
 
-        self.region_dfs_grt, self.region_display_names_grt, self.display_to_region_grt = extract_coordinates(
-            self.df_grt)
-        self.region_dfs_terega, self.region_display_names_terega, self.display_to_region_terega = extract_coordinates(
-            self.df_terega, has_altitude=True)
+        self.region_dfs_gaz, self.region_display_names_gaz, self.display_to_region_gaz = extract_coordinates(
+            self.df_gaz)
 
         self.setup_ui()
 
@@ -55,30 +52,17 @@ class App(customtkinter.CTk):
         self.frame_left.grid_columnconfigure(0, weight=1)
         self.frame_left.grid_columnconfigure(1, weight=1)
 
-        self.region_label_grt = customtkinter.CTkLabel(self.frame_left, text="GRTgaz Network:", anchor="w")
-        self.region_label_grt.grid(row=0, column=0, padx=(20, 20), pady=(20, 0))
+        self.region_label_gaz = customtkinter.CTkLabel(self.frame_left, text="Gaz Network:", anchor="w")
+        self.region_label_gaz.grid(row=0, column=0, padx=(20, 20), pady=(20, 0))
 
-        self.region_frame_grt = customtkinter.CTkFrame(self.frame_left, fg_color=None)
-        self.region_frame_grt.grid(row=1, column=0, columnspan=2, padx=(20, 20), pady=(10, 0), sticky="n")
+        self.region_frame_gaz = customtkinter.CTkFrame(self.frame_left, fg_color=None)
+        self.region_frame_gaz.grid(row=1, column=0, columnspan=2, padx=(20, 20), pady=(10, 0), sticky="n")
 
-        self.region_checkboxes_grt = {}
-        for idx, (region, display_name) in enumerate(self.region_display_names_grt.items()):
-            self.region_checkboxes_grt[region] = customtkinter.CTkCheckBox(self.region_frame_grt, text=display_name,
+        self.region_checkboxes_gaz = {}
+        for idx, (region, display_name) in enumerate(self.region_display_names_gaz.items()):
+            self.region_checkboxes_gaz[region] = customtkinter.CTkCheckBox(self.region_frame_gaz, text=display_name,
                                                                            command=lambda: change_region(self))
-            self.region_checkboxes_grt[region].grid(row=idx, column=0, padx=(0, 0), pady=(5, 0), sticky="w")
-
-        self.region_label_terega = customtkinter.CTkLabel(self.frame_left, text="Teréga Network:", anchor="w")
-        self.region_label_terega.grid(row=2, column=0, padx=(20, 20), pady=(20, 0))
-
-        self.region_frame_terega = customtkinter.CTkFrame(self.frame_left, fg_color=None)
-        self.region_frame_terega.grid(row=3, column=0, columnspan=2, padx=(20, 20), pady=(10, 0), sticky="n")
-
-        self.region_checkboxes_terega = {}
-        for idx, (region, display_name) in enumerate(self.region_display_names_terega.items()):
-            self.region_checkboxes_terega[region] = customtkinter.CTkCheckBox(self.region_frame_terega,
-                                                                              text=display_name,
-                                                                              command=lambda: change_region(self))
-            self.region_checkboxes_terega[region].grid(row=idx, column=0, padx=(0, 0), pady=(5, 0), sticky="w")
+            self.region_checkboxes_gaz[region].grid(row=idx, column=0, padx=(0, 0), pady=(5, 0), sticky="w")
 
         self.map_label = customtkinter.CTkLabel(self.frame_left, text="Background:", anchor="w")
         self.map_label.grid(row=5, column=0, padx=(20, 0), pady=(20, 0))

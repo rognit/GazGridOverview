@@ -3,17 +3,10 @@ import json
 import numpy as np
 
 
-def load_grt_data():
-    grt_csv_file = 'resources/grt.csv'
-    df_grt = pd.read_csv(grt_csv_file, delimiter=';')
+def load_gaz_data():
+    grt_csv_file = 'resources/gaz_network_colored.csv'
+    df_grt = pd.read_csv(grt_csv_file)
     return df_grt
-
-
-def load_terega_data():
-    terega_csv_file = 'resources/terega.csv'
-    df_terega = pd.read_csv(terega_csv_file, delimiter=';')
-    return df_terega
-
 
 def extract_coordinates(df, has_altitude=False):
     def get_coordinates(geo_shape):
