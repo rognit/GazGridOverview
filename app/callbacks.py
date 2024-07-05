@@ -1,3 +1,5 @@
+import ast
+
 import customtkinter
 
 
@@ -10,7 +12,7 @@ def change_region(app):
     for region, checkbox in app.region_checkboxes_gaz.items():
         if checkbox.get():
             for index, row in app.region_dfs_gaz[region].iterrows():
-                app.map_widget.set_path(row['coordinates'], color=row['color'])
+                app.map_widget.set_path(ast.literal_eval(row['coordinates']), color=row['color'])
 
 def change_map(app, new_map):
     if new_map == "OpenStreetMap":

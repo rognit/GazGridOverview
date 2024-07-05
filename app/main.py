@@ -1,15 +1,16 @@
 import customtkinter
+import pandas as pd
 from tkintermapview import TkinterMapView
-from data.load_data import load_gaz_data, extract_coordinates
+from data.load_data import extract_regions
 from app.callbacks import change_region, change_map, change_appearance_mode, search_event
 
 
-class App(customtkinter.CTk):
+class App(customtkinter.CTk,):
     APP_NAME = "French Gas Network Overview"
     WIDTH = 800
     HEIGHT = 500
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, gaz_network_path, gaz_network_colored_path, pop_filtered_path, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title(App.APP_NAME)
         self.geometry(str(App.WIDTH) + "x" + str(App.HEIGHT))
@@ -18,12 +19,13 @@ class App(customtkinter.CTk):
         self.bind("<Command-q>", self.on_closing)
         self.bind("<Command-w>", self.on_closing)
         self.createcommand('tk::mac::Quit', self.on_closing)
-        self.marker_list = []
 
-        self.df_gaz = load_gaz_data()
+        self.gaz_network = pd.read_csv(gaz_network_path)
+        self.gaz_network_colored = pd.read_csv(gaz_network_colored_path)
+        self.pop_filtered = pd.read_csv(pop_filtered_path)
 
-        self.region_dfs_gaz, self.region_display_names_gaz, self.display_to_region_gaz = extract_coordinates(
-            self.df_gaz)
+        self.region_dfs_gaz, self.region_display_names_gaz, self.display_to_region_gaz = extract_regions(
+            self.gaz_network_colored)
 
         self.setup_ui()
 
