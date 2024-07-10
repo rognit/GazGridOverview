@@ -9,10 +9,11 @@ from pyproj import CRS, Transformer
 from config import *
 
 
-def add_color_to_edges(buffer_distance=200,
-                       square_size=200,
-                       orange_threshold=300,
-                       red_threshold=3000):
+def compute_parameters(buffer_distance=BUFFER_DISTANCE,
+                       square_size=SQUARE_SIZE,
+                       orange_threshold=ORANGE_THRESHOLD,
+                       red_threshold=RED_THRESHOLD):
+    squared_buffer_distance = buffer_distance ** 2
     gaz_df = pd.read_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_PATH)))
     pop_df = pd.read_csv(os.path.normpath(os.path.join('..', POPULATION_PATH)))
     pop_df.set_index(['north', 'east'], inplace=True)
@@ -27,9 +28,9 @@ def add_color_to_edges(buffer_distance=200,
     # (48.329768832956944 -1.5720923688546355)
     # north, east = to_crs.transform(lon, lat)
 
-    def get_density(east, north):
+    def get_density(x, y):
         try:
-            return pop_df.loc[(north, east), 'density']
+            return pop_df.loc[(y, x), 'density']  # x, y = east, north
         except KeyError:
             return 0
 
@@ -39,165 +40,146 @@ def add_color_to_edges(buffer_distance=200,
     def get_square(x, y):
         return round_down_to_nearest(x), round_down_to_nearest(y)
 
-    def get_colors_from_section(coordinates):
-        target = False
-        if coordinates == "((48.39519077931831, -2.460554703566476), (48.397489697819054, -2.466292575615411))":
-            target = True
-
-        section = [to_crs.transform(*vertex) for vertex in ast.literal_eval(coordinates)]
-        if target :
-            print(ast.literal_eval(coordinates))
-            print(section)
-
-        def get_squares_from_edge(x1, y1, x2, y2):
-            dx, dy = x2 - x1, y2 - y1
-            length = math.sqrt(dx ** 2 + dy ** 2)
-            edge_squares = set()
-            if length == 0:
-                return edge_squares
-
-            def get_line(x1_local, y1_local, x2_local, y2_local):
-                dx_local, dy_local = x2_local - x1_local, y2_local - y1_local
-                if dx_local == 0:
-                    return lambda x: (y1_local + y2_local) /2
-                a = dy_local / dx_local
-                b = y1_local - a * x1_local
-                return lambda x: a * x + b
-
-            def get_squares_from_line(x1_local, y1_local, x2_local, y2_local):
-                x_square_1, y_square_1 = get_square(x1_local, y1_local)
-                x_square_2, y_square_2 = get_square(x2_local, y2_local)
-
-                f = get_line(x1_local, y1_local, x2_local, y2_local)
-                direction = 1 if x1_local < x2_local else -1
-
-                output_squares = [(y_square_1, x_square_1)]
-                old_north_square = y_square_1
-                for east_square in range(x_square_1 + 1, x_square_2 + 1, direction * square_size):
-                    north_square = round_down_to_nearest(f(east_square))
-                    for crossed_north_square in range(old_north_square, north_square + 1, square_size):
-                        output_squares.append(get_square(crossed_north_square, east_square))
-                    old_north_square = north_square
-
-                return output_squares
-
-            def get_boundaries():
-                # Normalized normal vectors
-                xn1, yn1 = -dy / length, dx / length
-                xn2, yn2 = dy / length, -dx / length
-
-                return ((x1 + buffer_distance * xn1,  # Border 1
-                         y1 + buffer_distance * yn1,
-                         x2 + buffer_distance * xn1,
-                         y2 + buffer_distance * yn1),
-                        (x1 + buffer_distance * xn2,  # Border 2
-                         y1 + buffer_distance * yn2,
-                         x2 + buffer_distance * xn2,
-                         y2 + buffer_distance * yn2))
-
-            (x1_l1, y1_l1, x2_l1, y2_l1), (x1_l2, y1_l2, x2_l2, y2_l2) = get_boundaries()
-
-            edge_squares.update(get_squares_from_line(x1_l1, y1_l1, x2_l1, y2_l1))
-            edge_squares.update(get_squares_from_line(x1_l2, y1_l2, x2_l2, y2_l2))
-
-            number_of_lines = int(buffer_distance * 2 / square_size)
-            for i in range(1, number_of_lines):
-                offset_x = i * square_size * (x2_l1 - x1_l1) / length
-                offset_y = i * square_size * (y2_l1 - y1_l1) / length
-                edge_squares.update(
-                    get_squares_from_line(x1_l1 + offset_x, y1_l1 + offset_y, x2_l1 + offset_x, y2_l1 + offset_y))
-            if target:
-                print(edge_squares)
+    def get_squares_from_edge(x1, y1, x2, y2):
+        if x1 > x2:
+            x1, y1, x2, y2 = x2, y2, x1, y1
+        dx, dy = x2 - x1, y2 - y1
+        dir_y = -1 if dy < 0 else 1
+        length = math.sqrt(dx ** 2 + dy ** 2)
+        edge_squares = set()
+        if length == 0:
             return edge_squares
+        dxn, dyn = dx / length, dy / length  # Normalized direction vector
+        dxnp, dynp = -dyn, dxn  # Perpendicular normalized direction vector (trigonometric direction = left)
 
-        def get_square_from_vertex(vertex):
-            def is_within_distance(x_corner, y_corner, x_vertex, y_vertex):
-                return math.sqrt((x_corner - x_vertex) ** 2 + (y_corner - y_vertex) ** 2) <= buffer_distance
+        def get_line(x1_local, y1_local):
+            a = dy / dx
+            b = y1_local - a * x1_local
+            return lambda x: a * x + b
 
-            def get_squares_from_corner(x_corner, y_corner):
-                return ((x_corner, y_corner),
-                        (x_corner - square_size, y_corner),
-                        (x_corner, y_corner - square_size),
-                        (x_corner - square_size, y_corner - square_size))
-            x_initial_square, y_initial_square = get_square(*vertex)
-            if target:
-                print(f"x: {x_initial_square}, y: {y_initial_square}")
-            edge_corners = set()
-            n_ring = 0
-            while n_ring * square_size <= buffer_distance:
-                for i in range(-n_ring, n_ring + 1):
-                    for j in range(-n_ring, n_ring + 1):
-                        corners = [
-                            (x_initial_square + j * square_size, y_initial_square + i * square_size),
-                            (x_initial_square + j * square_size, y_initial_square + (i + 1) * square_size),
-                            (x_initial_square + (j + 1) * square_size, y_initial_square + i * square_size),
-                            (x_initial_square + (j + 1) * square_size, y_initial_square + (i + 1) * square_size)
-                        ]
-                        for corner in corners:
-                            edge_corners.add(corner)
-                n_ring += 1
+        def get_squares_from_line(x1_local, y1_local, x2_local, y2_local):
 
-            edge_squares = set()
-            for edge_corner in edge_corners:
-                if is_within_distance(*edge_corner, *vertex):
-                    edge_squares.update(get_squares_from_corner(*edge_corner))
+            x_square_start, y_square_start = get_square(x1_local, y1_local)
+            x_square_end, y_square_end = get_square(x2_local, y2_local)
 
-            return edge_squares
+            if x_square_start == x_square_end:
+                return set(
+                    (x_square_start, y) for y in range(y_square_start, y_square_end + dir_y, square_size * dir_y))
 
-        def get_color_from_squares(squares):
-            max_density = max(get_density(*square) for square in squares)
+            f = get_line(x1_local, y1_local)
+            output_squares = set()
 
-            if max_density < orange_threshold:
-                return 'green'
-            elif max_density < red_threshold:
-                return 'orange'
-            else:
-                return 'red'
+            def add_column_squares(low_bound, high_bound, step, abscissa):
+                for crossed_y_square in range(low_bound, high_bound, step):
+                    output_squares.add((get_square(abscissa, crossed_y_square)))
 
-        a = (48.39755798778617, -2.466250107695534)
-        b = (48.397489697819054, -2.466292575615411)
-        c = (48.39519077931831, -2.460554703566476)
+            # Start
+            y_first_axis = round_down_to_nearest(f(x_square_start + square_size))
+            add_column_squares(y_square_start, y_first_axis + dir_y, square_size * dir_y, x_square_start)
 
-        if False:
-            b, c = to_crs.transform(*b), to_crs.transform(*c)
-            print(b, c)
-            sb, sc, = get_square_from_vertex(b), get_square_from_vertex(c)
-            print(sb, sc)
-            sbc = get_squares_from_edge(*b, *c)
-            print(sbc)
-            print(get_color_from_squares(sb), get_color_from_squares(sc), get_color_from_squares(sbc))
+            old_y = y_first_axis
+            for x_square in range(round_down_to_nearest(x_square_start + square_size), x_square_end, square_size):
+                y_square = round_down_to_nearest(f(x_square + square_size))
+                add_column_squares(old_y, y_square + dir_y, square_size * dir_y, x_square)
+                old_y = y_square
 
+            # End
+            add_column_squares(old_y, y_square_end + dir_y, square_size * dir_y, x_square_end)
 
+            return output_squares
 
-        old_vertex = section[0]
-        old_vertex_squares = get_square_from_vertex(old_vertex)
-        sub_section_colors = []
+        # Line 1 = Border left
+        x1_l1, y1_l1 = x1 + buffer_distance * dxnp, y1 + buffer_distance * dynp
+        x2_l1, y2_l1 = x2 + buffer_distance * dxnp, y2 + buffer_distance * dynp
+        # Line 2 = Border right
+        x1_l2, y1_l2 = x1 + buffer_distance * -dxnp, y1 + buffer_distance * -dynp
+        x2_l2, y2_l2 = x2 + buffer_distance * -dxnp, y2 + buffer_distance * -dynp
 
-        for vertex in section[1:]:
-            vertex_squares = get_square_from_vertex(vertex)
-            sub_section_squares = old_vertex_squares | get_squares_from_edge(*old_vertex, *vertex) | vertex_squares
+        number_of_lines = int(buffer_distance * 2 / square_size - 1)
 
-            old_vertex = vertex
-            old_vertex_squares = vertex_squares
+        offset_x = square_size * -dxnp
+        offset_y = square_size * -dynp
 
-            sub_section_colors.append(get_color_from_squares(sub_section_squares))
-        return sub_section_colors
+        for i in range(number_of_lines + 1):
+            line = x1_l1 + i * offset_x, y1_l1 + i * offset_y, x2_l1 + i * offset_x, y2_l1 + i * offset_y
+            edge_squares.update(get_squares_from_line(*line))
 
-    tqdm.pandas()
-    gaz_df['section_colors'] = gaz_df['coordinates'].progress_apply(get_colors_from_section)
+        edge_squares.update(get_squares_from_line(x1_l2, y1_l2, x2_l2, y2_l2))
 
-    def worse_color(colors):
-        if 'red' in colors:
-            return 'red'
-        elif 'orange' in colors:
+        return edge_squares
+
+    def get_squares_from_vertex(x, y):
+        def is_within_distance(x_corner, y_corner):
+            return (x_corner - x) ** 2 + (y_corner - y) ** 2 <= squared_buffer_distance
+
+        def get_squares_from_corner(x_corner, y_corner):
+            return ((x_corner, y_corner),
+                    (x_corner - square_size, y_corner),
+                    (x_corner, y_corner - square_size),
+                    (x_corner - square_size, y_corner - square_size))
+
+        x_initial_square, y_initial_square = get_square(x, y)
+        edge_squares = set()
+        n_ring = 0
+        while n_ring * square_size <= buffer_distance:
+            for i in range(-n_ring, n_ring + 1):
+                for j in range(-n_ring, n_ring + 1):
+                    corners = [
+                        (x_initial_square + j * square_size, y_initial_square + i * square_size),
+                        (x_initial_square + j * square_size, y_initial_square + (i + 1) * square_size),
+                        (x_initial_square + (j + 1) * square_size, y_initial_square + i * square_size),
+                        (x_initial_square + (j + 1) * square_size, y_initial_square + (i + 1) * square_size)
+                    ]
+
+                    edge_squares.update(
+                        square
+                        for corner in corners if is_within_distance(*corner)
+                        for square in get_squares_from_corner(*corner)
+                    )
+
+                    # Ring squares in the same line or column as the vertex's initial square can be both under buffer
+                    # distance and not having their corner detected
+                    if i == 0:  # Same line
+                        x_local = x_initial_square + j * square_size
+                        if is_within_distance(x_local, y) or is_within_distance(x_local + square_size, y):
+                            edge_squares.add(get_square(x_local, y))
+                    if j == 0:  # Same column
+                        y_local = y_initial_square + i * square_size
+                        if is_within_distance(x, y_local) or is_within_distance(x, y_local + square_size):
+                            edge_squares.add(get_square(x, y_local))
+
+            n_ring += 1
+
+        return edge_squares
+
+    def get_color_from_squares(squares):
+        max_density = max(get_density(x, y) for (x, y) in squares)
+
+        if max_density < orange_threshold:
+            return 'green'
+        elif max_density < red_threshold:
             return 'orange'
         else:
-            return 'green'
+            return 'red'
 
-    gaz_df['color'] = gaz_df['section_colors'].apply(worse_color)
+    def get_color_from_segment(segment):
+
+        ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in
+                                ast.literal_eval(segment))  # coordinates is a string
+
+        if segment == "((48.39519077931831, -2.460554703566476), (48.397489697819054, -2.466292575615411))":
+            print(get_squares_from_edge(x1, y1, x2, y2))
+
+        segment_squares = (get_squares_from_vertex(x1, y1) | get_squares_from_edge(x1, y1, x2, y2) |
+                           get_squares_from_vertex(x2, y2))
+
+        return get_color_from_squares(segment_squares)
+
+    tqdm.pandas()
+    gaz_df['color'] = gaz_df['coordinates'].progress_apply(get_color_from_segment)
 
     gaz_df.to_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_COLORED_PATH)), index=False)
 
 
-if __name__ == '__main__':
-    add_color_to_edges()
+if __name__ == '__main__':  # add color to each edge and merges adjacent edges of the same color
+    compute_parameters()
