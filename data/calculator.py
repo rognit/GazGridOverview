@@ -164,11 +164,8 @@ def compute_parameters(buffer_distance=BUFFER_DISTANCE,
 
     def get_color_from_segment(segment):
 
-        ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in
-                                ast.literal_eval(segment))  # coordinates is a string
-
-        if segment == "((48.39519077931831, -2.460554703566476), (48.397489697819054, -2.466292575615411))":
-            print(get_squares_from_edge(x1, y1, x2, y2))
+        ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in ast.literal_eval(segment))  # ast because
+        # coordinates is a string
 
         segment_squares = (get_squares_from_vertex(x1, y1) | get_squares_from_edge(x1, y1, x2, y2) |
                            get_squares_from_vertex(x2, y2))
@@ -178,8 +175,14 @@ def compute_parameters(buffer_distance=BUFFER_DISTANCE,
     tqdm.pandas()
     gaz_df['color'] = gaz_df['coordinates'].progress_apply(get_color_from_segment)
 
+    color_order = pd.CategoricalDtype(categories=['green', 'orange', 'red'], ordered=True)
+    gaz_df['color'] = gaz_df['color'].astype(color_order)
+
+    # Trier par région puis par couleur
+    gaz_df = gaz_df.sort_values(by=['region', 'color'])
+
     gaz_df.to_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_COLORED_PATH)), index=False)
 
 
-if __name__ == '__main__':  # add color to each edge and merges adjacent edges of the same color
+if __name__ == '__main__':  # add color to each edge and merge adjacent edges of the same color
     compute_parameters()

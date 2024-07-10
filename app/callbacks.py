@@ -14,6 +14,7 @@ def change_region(app):
             for index, row in app.region_dfs_gaz[region].iterrows():
                 app.map_widget.set_path(ast.literal_eval(row['coordinates']), color=row['color'])
 
+
 def change_map(app, new_map):
     if new_map == "OpenStreetMap":
         app.map_widget.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
