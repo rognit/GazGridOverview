@@ -9,24 +9,19 @@ from pyproj import CRS, Transformer
 from config import *
 
 
-def compute_parameters(buffer_distance=BUFFER_DISTANCE,
-                       square_size=SQUARE_SIZE,
+def compute_parameters(gaz_df, pop_df,
+                       buffer_distance=BUFFER_DISTANCE,
                        orange_threshold=ORANGE_THRESHOLD,
                        red_threshold=RED_THRESHOLD):
+    square_size = SQUARE_SIZE
     squared_buffer_distance = buffer_distance ** 2
-    gaz_df = pd.read_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_PATH)))
-    pop_df = pd.read_csv(os.path.normpath(os.path.join('..', POPULATION_PATH)))
-    pop_df.set_index(['north', 'east'], inplace=True)
+    colored_gaz_df = gaz_df.copy()
+
+
 
     crs3035 = CRS('EPSG:3035')
     wgs84 = CRS('EPSG:4326')
     to_crs = Transformer.from_crs(wgs84, crs3035)
-
-    # to_wgs = Transformer.from_crs(crs3035, wgs84)
-    # north, east = 2869000, 3466600
-    # lat, lon = to_wgs.transform(north, east)
-    # (48.329768832956944 -1.5720923688546355)
-    # north, east = to_crs.transform(lon, lat)
 
     def get_density(x, y):
         try:
@@ -173,16 +168,21 @@ def compute_parameters(buffer_distance=BUFFER_DISTANCE,
         return get_color_from_squares(segment_squares)
 
     tqdm.pandas()
-    gaz_df['color'] = gaz_df['coordinates'].progress_apply(get_color_from_segment)
+    colored_gaz_df['color'] = colored_gaz_df['coordinates'].progress_apply(get_color_from_segment)
 
     color_order = pd.CategoricalDtype(categories=['green', 'orange', 'red'], ordered=True)
-    gaz_df['color'] = gaz_df['color'].astype(color_order)
+    colored_gaz_df['color'] = colored_gaz_df['color'].astype(color_order)
 
-    # Trier par région puis par couleur
-    gaz_df = gaz_df.sort_values(by=['region', 'color'])
+    colored_gaz_df = colored_gaz_df.sort_values(by=['region', 'color'])  # Sort by color because Green < Orange < Red
 
-    gaz_df.to_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_COLORED_PATH)), index=False)
+    print(colored_gaz_df.head())
+
+    return colored_gaz_df
 
 
-if __name__ == '__main__':  # add color to each edge and merge adjacent edges of the same color
-    compute_parameters()
+if __name__ == '__main__':
+    gaz_df = pd.read_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_PATH)))
+    pop_df = pd.read_csv(os.path.normpath(os.path.join('..', POPULATION_PATH)))
+    pop_df.set_index(['north', 'east'], inplace=True)
+    colored_df = compute_parameters(gaz_df, pop_df)
+    colored_df.to_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_COLORED_PATH)), index=False)

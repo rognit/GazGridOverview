@@ -1,6 +1,7 @@
 import ast
-
 import customtkinter
+
+from data.calculator import compute_parameters
 
 
 def search_event(app, event=None):
@@ -26,3 +27,24 @@ def change_map(app, new_map):
 
 def change_appearance_mode(app, new_appearance_mode):
     customtkinter.set_appearance_mode(new_appearance_mode)
+
+
+def recalculate_segments(app):
+    buffer_distance = int(app.buffer_distance_entry.get())
+    orange_threshold = int(app.orange_threshold_entry.get())
+    red_threshold = int(app.red_threshold_entry.get())
+
+    print(app.colored_gaz_network.head())
+
+    app.colored_gaz_network = compute_parameters(
+        app.gaz_network,
+        app.pop_filtered,
+        buffer_distance,
+        orange_threshold,
+        red_threshold
+    )
+
+    print(app.colored_gaz_network.head())
+
+    app.extract_regions()
+    change_region(app)
