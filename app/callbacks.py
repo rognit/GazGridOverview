@@ -34,17 +34,14 @@ def recalculate_segments(app):
     orange_threshold = int(app.orange_threshold_entry.get())
     red_threshold = int(app.red_threshold_entry.get())
 
-    print(app.colored_gaz_network.head())
-
-    app.colored_gaz_network = compute_parameters(
+    app.colored_gaz_network, app.gaz_df = compute_parameters(
         app.gaz_network,
-        app.pop_filtered,
+        app.pop_df,
         buffer_distance,
         orange_threshold,
         red_threshold
     )
 
-    print(app.colored_gaz_network.head())
-
     app.extract_regions()
+
     change_region(app)

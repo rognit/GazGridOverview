@@ -10,7 +10,8 @@ class App(customtkinter.CTk):
     WIDTH = 800
     HEIGHT = 600
 
-    def __init__(self, gaz_network_path, gaz_network_colored_path, pop_filtered_path, *args, **kwargs):
+    def __init__(self, gaz_network_path, gaz_network_colored_path, gaz_network_colored_merged_path, pop_filtered_path,
+                 *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title(App.APP_NAME)
         self.geometry(str(App.WIDTH) + "x" + str(App.HEIGHT))
@@ -22,8 +23,9 @@ class App(customtkinter.CTk):
 
         self.gaz_network = pd.read_csv(gaz_network_path)
         self.colored_gaz_network = pd.read_csv(gaz_network_colored_path)
-        self.pop_filtered = pd.read_csv(pop_filtered_path)
-        self.pop_filtered.set_index(['north', 'east'], inplace=True)
+        self.gaz_df = pd.read_csv(gaz_network_colored_merged_path)
+        self.pop_df = pd.read_csv(pop_filtered_path)
+        self.pop_df.set_index(['north', 'east'], inplace=True)
 
         self.extract_regions()
         self.setup_ui()
@@ -43,9 +45,9 @@ class App(customtkinter.CTk):
         self.create_right_frame()
 
     def extract_regions(self):
-        regions = self.colored_gaz_network['region'].unique()
+        regions = self.gaz_df['region'].unique()
         self.region_dfs_gaz = {
-            region: self.colored_gaz_network[self.colored_gaz_network['region'] == region] for region in regions
+            region: self.gaz_df[self.gaz_df['region'] == region] for region in regions
         }
 
         region_counts = {region: len(self.region_dfs_gaz[region]) for region in regions}

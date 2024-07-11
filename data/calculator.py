@@ -1,12 +1,52 @@
 import math
-import json
 import ast
 import os
 
 import pandas as pd
+import networkx as nx
 from tqdm import tqdm
 from pyproj import CRS, Transformer
+
 from config import *
+
+
+def merge_region_segments(region_df):
+    graph = nx.Graph()
+
+    # Adding edges to the graph
+    for _, row in region_df.iterrows():
+        segment = eval(row['coordinates'])
+        graph.add_edge(segment[0], segment[1])
+
+    # Find related components
+    components = list(nx.connected_components(graph))
+
+    # Transform each connected component into an ordered list of points
+    merged_segments = []
+    for component in components:
+        subgraph = graph.subgraph(component)
+        # Finding an orderly path
+        path = list(nx.dfs_edges(subgraph))
+        if path:
+            ordered_points = [path[0][0]]
+            for edge in path:
+                ordered_points.append(edge[1])
+            merged_segments.append(ordered_points)
+
+    return merged_segments
+
+
+def merge_all_segments(df):
+    merged_data = []
+    for region in df['region'].unique():
+        region_df = df[df['region'] == region]
+        for color in region_df['color'].unique():
+            color_df = region_df[region_df['color'] == color]
+            merged_segments = merge_region_segments(color_df)
+            for segment in merged_segments:
+                merged_data.append({'region': region, 'color': color, 'coordinates': segment})
+
+    return pd.DataFrame(merged_data)
 
 
 def compute_parameters(gaz_df, pop_df,
@@ -15,9 +55,6 @@ def compute_parameters(gaz_df, pop_df,
                        red_threshold=RED_THRESHOLD):
     square_size = SQUARE_SIZE
     squared_buffer_distance = buffer_distance ** 2
-    colored_gaz_df = gaz_df.copy()
-
-
 
     crs3035 = CRS('EPSG:3035')
     wgs84 = CRS('EPSG:4326')
@@ -167,6 +204,7 @@ def compute_parameters(gaz_df, pop_df,
 
         return get_color_from_squares(segment_squares)
 
+    colored_gaz_df = gaz_df.copy()
     tqdm.pandas()
     colored_gaz_df['color'] = colored_gaz_df['coordinates'].progress_apply(get_color_from_segment)
 
@@ -175,14 +213,15 @@ def compute_parameters(gaz_df, pop_df,
 
     colored_gaz_df = colored_gaz_df.sort_values(by=['region', 'color'])  # Sort by color because Green < Orange < Red
 
-    print(colored_gaz_df.head())
+    merged_colored_gaz_df = merge_all_segments(colored_gaz_df)
 
-    return colored_gaz_df
+    return colored_gaz_df, merged_colored_gaz_df
 
 
 if __name__ == '__main__':
     gaz_df = pd.read_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_PATH)))
     pop_df = pd.read_csv(os.path.normpath(os.path.join('..', POPULATION_PATH)))
     pop_df.set_index(['north', 'east'], inplace=True)
-    colored_df = compute_parameters(gaz_df, pop_df)
+    colored_df, merged_df = compute_parameters(gaz_df, pop_df)
     colored_df.to_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_COLORED_PATH)), index=False)
+    merged_df.to_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_COLORED_MERGED_PATH)), index=False)

@@ -1,6 +1,7 @@
 import os
 import sys
 from app.main import App
+from config import *
 
 
 def resource_path(relative_path):
@@ -11,10 +12,11 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-gaz_network_path = resource_path('resources/gaz_network.csv')
-gaz_network_colored_path = resource_path('resources/gaz_network_colored.csv')
-pop_filtered_path = resource_path('resources/pop_filtered.csv')
-
 if __name__ == "__main__":
-    app = App(gaz_network_path, gaz_network_colored_path, pop_filtered_path)
+    app = App(
+        resource_path(GAZ_NETWORK_PATH),
+        resource_path(GAZ_NETWORK_COLORED_PATH),
+        resource_path(GAZ_NETWORK_COLORED_MERGED_PATH),
+        resource_path(POPULATION_PATH)
+    )
     app.start()
