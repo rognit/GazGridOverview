@@ -169,6 +169,8 @@ class App(customtkinter.CTk):
         self.progress_bar = ttk.Progressbar(self.loading_screen, variable=self.progress_var, maximum=100)
         self.progress_bar.pack(pady=10)
 
+        self.center_window(self.loading_screen)
+
         self.loading_screen.transient(self)
         self.loading_screen.grab_set()
         self.loading_screen.lift(self)
@@ -192,3 +194,7 @@ class App(customtkinter.CTk):
 
     def start(self):
         self.mainloop()
+
+    def center_window(self, window):
+        window.update_idletasks()
+        window.geometry(f"{300}x{100}+{window.winfo_screenwidth() // 2}+{window.winfo_screenheight() // 2}")

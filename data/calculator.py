@@ -250,14 +250,10 @@ def compute_parameters(gaz_df, pop_df,
     total_segments = len(colored_gaz_df)
     progress_callback(0)  # initialize progress bar to 0
 
-    def update_progress(index):
-        progress = int((index / total_segments) * 100)
-        progress_callback(progress)
-
-    colored_gaz_df['color'] = colored_gaz_df['coordinates'].progress_apply(get_color_from_segment)
-
-    for idx in tqdm(range(total_segments), desc="Computing segments"):
-        update_progress(idx)
+    for idx, row in enumerate(tqdm(colored_gaz_df.itertuples(), total=total_segments, desc="Computing segments")):
+        color = get_color_from_segment(row.coordinates)
+        colored_gaz_df.at[row.Index, 'color'] = color
+        progress_callback(int((idx / total_segments) * 100))
 
     color_order = pd.CategoricalDtype(categories=['green', 'orange', 'red'], ordered=True)
     colored_gaz_df['color'] = colored_gaz_df['color'].astype(color_order)
