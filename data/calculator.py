@@ -9,44 +9,81 @@ from pyproj import CRS, Transformer
 
 from config import *
 
+def merge_region_color_segments(df):
+    def parse_segment(segment):
+        return ast.literal_eval(segment.strip())
 
-def merge_region_segments(region_df):
-    graph = nx.Graph()
+    segments = [parse_segment(segment) for segment in df['coordinates']]
 
-    # Adding edges to the graph
-    for _, row in region_df.iterrows():
-        segment = eval(row['coordinates'])
-        graph.add_edge(segment[0], segment[1])
+    paths = []
 
-    # Find related components
-    components = list(nx.connected_components(graph))
+    for seg in segments:
+        merged = False
+        for path in paths:
+            if seg[0] == path[-1]:
+                path.append(seg[1])
+                merged = True
+                break
+            elif seg[1] == path[0]:
+                path.insert(0, seg[0])
+                merged = True
+                break
+            elif seg[1] == path[-1]:
+                path.append(seg[0])
+                merged = True
+                break
+            elif seg[0] == path[0]:
+                path.insert(0, seg[1])
+                merged = True
+                break
+        if not merged:
+            paths.append(list(seg))
 
-    # Transform each connected component into an ordered list of points
-    merged_segments = []
-    for component in components:
-        subgraph = graph.subgraph(component)
-        # Finding an orderly path
-        path = list(nx.dfs_edges(subgraph))
-        if path:
-            ordered_points = [path[0][0]]
-            for edge in path:
-                ordered_points.append(edge[1])
-            merged_segments.append(ordered_points)
+    # Merging connected paths
+    merged_sections = []
+    while paths:
+        current_path = paths.pop(0)
+        merged = False
+        for i, path in enumerate(paths):
+            if current_path[-1] == path[0]:
+                current_path.extend(path[1:])
+                paths.pop(i)
+                merged = True
+                break
+            elif current_path[0] == path[-1]:
+                current_path = path[:-1] + current_path
+                paths.pop(i)
+                merged = True
+                break
+            elif current_path[-1] == path[-1]:
+                current_path.extend(reversed(path[:-1]))
+                paths.pop(i)
+                merged = True
+                break
+            elif current_path[0] == path[0]:
+                current_path = list(reversed(path[1:])) + current_path
+                paths.pop(i)
+                merged = True
+                break
+        if merged:
+            paths.append(current_path)
+        else:
+            merged_sections.append(current_path)
 
-    return merged_segments
+    return merged_sections
 
 
 def merge_all_segments(df):
-    merged_data = []
+    merged_section = []
     for region in df['region'].unique():
         region_df = df[df['region'] == region]
         for color in region_df['color'].unique():
             color_df = region_df[region_df['color'] == color]
-            merged_segments = merge_region_segments(color_df)
+            merged_segments = merge_region_color_segments(color_df)
             for segment in merged_segments:
-                merged_data.append({'region': region, 'color': color, 'coordinates': segment})
+                merged_section.append({'region': region, 'color': color, 'coordinates': segment})
 
-    return pd.DataFrame(merged_data)
+    return pd.DataFrame(merged_section)
 
 
 def compute_parameters(gaz_df, pop_df,
@@ -151,7 +188,7 @@ def compute_parameters(gaz_df, pop_df,
                     (x_corner - square_size, y_corner - square_size))
 
         x_initial_square, y_initial_square = get_square(x, y)
-        edge_squares = set()
+        edge_squares = {(x_initial_square, y_initial_square)}
         n_ring = 0
         while n_ring * square_size <= buffer_distance:
             for i in range(-n_ring, n_ring + 1):
@@ -196,8 +233,8 @@ def compute_parameters(gaz_df, pop_df,
 
     def get_color_from_segment(segment):
 
-        ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in ast.literal_eval(segment))  # ast because
-        # coordinates is a string
+        ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in ast.literal_eval(segment))  # ast.literal_eval
+        # because coordinates is a string
 
         segment_squares = (get_squares_from_vertex(x1, y1) | get_squares_from_edge(x1, y1, x2, y2) |
                            get_squares_from_vertex(x2, y2))
