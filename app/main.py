@@ -4,8 +4,8 @@ import customtkinter
 import pandas as pd
 from tkintermapview import TkinterMapView
 from app.callbacks import change_region, change_map, change_appearance_mode, search_event, recalculate_segments
-
 from tkinter import ttk
+import threading
 
 class App(customtkinter.CTk):
     APP_NAME = "French Gas Network Overview"
@@ -182,7 +182,12 @@ class App(customtkinter.CTk):
 
     def start_recalculation(self):
         self.show_loading_screen()
-        self.after(100, lambda: recalculate_segments(self))
+        thread = threading.Thread(target=self.run_recalculation)
+        thread.start()
+
+    def run_recalculation(self):
+        recalculate_segments(self)
+        self.after(0, self.hide_loading_screen)
 
     def update_progress(self, value):
         if self.progress_var is not None:

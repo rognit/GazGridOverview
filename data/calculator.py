@@ -248,9 +248,9 @@ def compute_parameters(gaz_df, pop_df,
     tqdm.pandas()
 
     total_segments = len(colored_gaz_df)
-    progress_callback(0)  # initialize progress bar to 0
+    progress_callback(0)
 
-    for idx, row in enumerate(tqdm(colored_gaz_df.itertuples(), total=total_segments, desc="Computing segments")):
+    for idx, row in enumerate(colored_gaz_df.itertuples()):
         color = get_color_from_segment(row.coordinates)
         colored_gaz_df.at[row.Index, 'color'] = color
         progress_callback(int((idx / total_segments) * 100))
@@ -262,7 +262,7 @@ def compute_parameters(gaz_df, pop_df,
 
     merged_colored_gaz_df = merge_all_segments(colored_gaz_df)
 
-    progress_callback(100)  # set progress to 100 when done
+    progress_callback(100)
 
     return colored_gaz_df, merged_colored_gaz_df
 
