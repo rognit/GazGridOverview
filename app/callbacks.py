@@ -1,3 +1,4 @@
+# callbacks.py
 import ast
 import customtkinter
 
@@ -17,7 +18,6 @@ def change_region(app):
                 coordinates = ast.literal_eval(row['coordinates']) if isinstance(row['coordinates'], str)\
                     else row['coordinates']
                 app.map_widget.set_path(coordinates, color=row['color'])
-
 
 
 def change_map(app, new_map):
@@ -43,9 +43,10 @@ def recalculate_segments(app):
         app.pop_df,
         buffer_distance,
         orange_threshold,
-        red_threshold
+        red_threshold,
+        app.update_progress  # Pass the update_progress method
     )
 
     app.extract_regions()
-
     change_region(app)
+    app.hide_loading_screen()

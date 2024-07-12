@@ -1,9 +1,11 @@
 # main.py
+
 import customtkinter
 import pandas as pd
 from tkintermapview import TkinterMapView
 from app.callbacks import change_region, change_map, change_appearance_mode, search_event, recalculate_segments
 
+from tkinter import ttk
 
 class App(customtkinter.CTk):
     APP_NAME = "French Gas Network Overview"
@@ -15,7 +17,7 @@ class App(customtkinter.CTk):
         super().__init__(*args, **kwargs)
         self.title(App.APP_NAME)
         self.geometry(str(App.WIDTH) + "x" + str(App.HEIGHT))
-        self.minsize(App.WIDTH, App.HEIGHT)
+        self.minsize(App.WIDTH, self.HEIGHT)
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind("<Command-q>", self.on_closing)
         self.bind("<Command-w>", self.on_closing)
@@ -26,6 +28,10 @@ class App(customtkinter.CTk):
         self.gaz_df = pd.read_csv(gaz_network_colored_merged_path)
         self.pop_df = pd.read_csv(pop_filtered_path)
         self.pop_df.set_index(['north', 'east'], inplace=True)
+
+        self.loading_screen = None
+        self.progress_var = None
+        self.progress_bar = None
 
         self.extract_regions()
         self.setup_ui()
@@ -53,7 +59,6 @@ class App(customtkinter.CTk):
         region_counts = {region: len(self.region_dfs_gaz[region]) for region in regions}
         self.region_display_names_gaz = {region: f"{region} ({count})" for region, count in region_counts.items()}
         self.display_to_region_gaz = {v: k for k, v in self.region_display_names_gaz.items()}
-
 
     def create_left_frame(self):
         self.frame_left.grid_rowconfigure(0, weight=0)
@@ -105,7 +110,7 @@ class App(customtkinter.CTk):
         self.red_threshold_unit.grid(row=2, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
 
         self.recalculate_button = customtkinter.CTkButton(self.param_frame, text="Recalculate",
-                                                          command=lambda: recalculate_segments(self))
+                                                          command=lambda: self.start_recalculation())
         self.recalculate_button.grid(row=3, column=0, columnspan=3, padx=(20, 20), pady=(10, 20))
 
         self.map_label = customtkinter.CTkLabel(self.frame_left, text="Background:", anchor="w")
@@ -151,6 +156,36 @@ class App(customtkinter.CTk):
         self.buffer_distance_entry.insert(0, "200")
         self.orange_threshold_entry.insert(0, "250")
         self.red_threshold_entry.insert(0, "2500")
+
+    def show_loading_screen(self):
+        self.loading_screen = customtkinter.CTkToplevel(self)
+        self.loading_screen.geometry("300x100")
+        self.loading_screen.title("Loading")
+
+        label = customtkinter.CTkLabel(self.loading_screen, text="Calculations in progress, please wait...")
+        label.pack(pady=20)
+
+        self.progress_var = customtkinter.IntVar()
+        self.progress_bar = ttk.Progressbar(self.loading_screen, variable=self.progress_var, maximum=100)
+        self.progress_bar.pack(pady=10)
+
+        self.loading_screen.transient(self)
+        self.loading_screen.grab_set()
+        self.loading_screen.lift(self)
+
+    def hide_loading_screen(self):
+        if self.loading_screen is not None:
+            self.loading_screen.destroy()
+            self.loading_screen = None
+
+    def start_recalculation(self):
+        self.show_loading_screen()
+        self.after(100, lambda: recalculate_segments(self))
+
+    def update_progress(self, value):
+        if self.progress_var is not None:
+            self.progress_var.set(value)
+            self.update_idletasks()
 
     def on_closing(self, event=0):
         self.destroy()

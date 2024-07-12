@@ -1,3 +1,4 @@
+# calculator.py
 import math
 import ast
 import os
@@ -8,6 +9,7 @@ from tqdm import tqdm
 from pyproj import CRS, Transformer
 
 from config import *
+
 
 def merge_region_color_segments(df):
     def parse_segment(segment):
@@ -89,7 +91,8 @@ def merge_all_segments(df):
 def compute_parameters(gaz_df, pop_df,
                        buffer_distance=BUFFER_DISTANCE,
                        orange_threshold=ORANGE_THRESHOLD,
-                       red_threshold=RED_THRESHOLD):
+                       red_threshold=RED_THRESHOLD,
+                       progress_callback=None):
     square_size = SQUARE_SIZE
     squared_buffer_distance = buffer_distance ** 2
 
@@ -243,7 +246,18 @@ def compute_parameters(gaz_df, pop_df,
 
     colored_gaz_df = gaz_df.copy()
     tqdm.pandas()
+
+    total_segments = len(colored_gaz_df)
+    progress_callback(0)  # initialize progress bar to 0
+
+    def update_progress(index):
+        progress = int((index / total_segments) * 100)
+        progress_callback(progress)
+
     colored_gaz_df['color'] = colored_gaz_df['coordinates'].progress_apply(get_color_from_segment)
+
+    for idx in tqdm(range(total_segments), desc="Computing segments"):
+        update_progress(idx)
 
     color_order = pd.CategoricalDtype(categories=['green', 'orange', 'red'], ordered=True)
     colored_gaz_df['color'] = colored_gaz_df['color'].astype(color_order)
@@ -252,6 +266,8 @@ def compute_parameters(gaz_df, pop_df,
 
     merged_colored_gaz_df = merge_all_segments(colored_gaz_df)
 
+    progress_callback(100)  # set progress to 100 when done
+
     return colored_gaz_df, merged_colored_gaz_df
 
 
@@ -259,6 +275,6 @@ if __name__ == '__main__':
     gaz_df = pd.read_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_PATH)))
     pop_df = pd.read_csv(os.path.normpath(os.path.join('..', POPULATION_PATH)))
     pop_df.set_index(['north', 'east'], inplace=True)
-    colored_df, merged_df = compute_parameters(gaz_df, pop_df)
+    colored_df, merged_df = compute_parameters(gaz_df, pop_df, progress_callback=lambda x: None)
     colored_df.to_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_COLORED_PATH)), index=False)
     merged_df.to_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_COLORED_MERGED_PATH)), index=False)
