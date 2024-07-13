@@ -12,7 +12,6 @@ def search_event(app, event=None):
 def change_region(app):
     app.map_widget.delete_all_path()
     for region, checkbox in app.region_checkboxes_gaz.items():
-
         if checkbox.get():
             for index, row in app.region_dfs_gaz[region].iterrows():
                 coordinates = ast.literal_eval(row['coordinates']) if isinstance(row['coordinates'], str)\
@@ -48,5 +47,7 @@ def recalculate_segments(app):
     )
 
     app.extract_regions()
+    print('\ndebut')
     change_region(app)
+    print('fin')
     app.hide_loading_screen()

@@ -1,4 +1,4 @@
-# main.py
+# app.py
 
 import customtkinter
 import pandas as pd
@@ -181,6 +181,9 @@ class App(customtkinter.CTk):
             self.loading_screen = None
 
     def start_recalculation(self):
+        for checkbox in self.region_checkboxes_gaz:
+            self.region_checkboxes_gaz[checkbox].deselect()
+        change_region(self)
         self.show_loading_screen()
         thread = threading.Thread(target=self.run_recalculation)
         thread.start()

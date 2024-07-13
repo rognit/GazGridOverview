@@ -1,6 +1,6 @@
 import os
 import sys
-from app.main import App
+from app.app import App
 from config import *
 
 
