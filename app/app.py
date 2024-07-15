@@ -8,9 +8,9 @@ from tkinter import ttk
 import threading
 
 class App(customtkinter.CTk):
-    APP_NAME = "French Gas Network Overview"
-    WIDTH = 800
-    HEIGHT = 600
+    APP_NAME = "Gaz Grid Overview"
+    WIDTH = 1200
+    HEIGHT = 800
 
     def __init__(self, gaz_network_path, gaz_network_colored_path, gaz_network_colored_merged_path, pop_filtered_path,
                  *args, **kwargs):
