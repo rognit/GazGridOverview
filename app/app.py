@@ -1,5 +1,3 @@
-# app.py
-
 import customtkinter
 import pandas as pd
 from tkintermapview import TkinterMapView
