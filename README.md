@@ -76,8 +76,7 @@ A slight manual data cleaning is required (some regions may be missing from cert
 Run the following scripts to filter the data and create the base resource files:
 
 ```bash
-python data/gaz_network_filter.py
-python data/insee_filter.py
+python setup.py
 ```
 
 This will create the files `resources/gaz_network.csv` and `resources/pop_filtered.csv`.
@@ -97,7 +96,7 @@ python main.py
 ### Build version:
 
 ```bash
-pyinstaller --onefile --windowed --add-data 'resources/gaz_network.csv:resources' --add-data 'resources/gaz_network_colored.csv:resources' --add-data 'resources/gaz_network_colored_merged.csv:resources' --add-data 'resources/pop_filtered.csv:resources' --name GazGridOverview main.py
+pyinstaller --onefile --windowed --add-data 'resources/base_gaz_network.csv:resources' --add-data 'resources/base_population.csv:resources' --add-data 'resources/computed_gaz_network.csv:resources' --name GazGridOverview main.py
 ```
 
 The build file will then be located in the `dist/` folder.

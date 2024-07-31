@@ -13,7 +13,8 @@ def merge_region_color_segments(df):
     def parse_segment(segment):
         return ast.literal_eval(segment.strip())
 
-    segments = [parse_segment(segment) for segment in df['coordinates']]
+    #segments = [parse_segment(segment) for segment in df['coordinates']]
+    segments = [segment for segment in df['coordinates']]
 
     paths = []
 
@@ -234,7 +235,9 @@ def compute_parameters(gaz_df, pop_df,
 
     def get_color_from_segment(segment):
 
-        ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in ast.literal_eval(segment))  # ast.literal_eval
+        #print([segment])
+        ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in segment)
+        #((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in ast.literal_eval(segment))  # ast.literal_eval
         # because coordinates is a string
 
         segment_squares = (get_squares_from_vertex(x1, y1) | get_squares_from_edge(x1, y1, x2, y2) |
@@ -262,13 +265,4 @@ def compute_parameters(gaz_df, pop_df,
 
     progress_callback(100)
 
-    return colored_gaz_df, merged_colored_gaz_df
-
-
-if __name__ == '__main__':
-    gaz_df = pd.read_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_PATH)))
-    pop_df = pd.read_csv(os.path.normpath(os.path.join('..', POPULATION_PATH)))
-    pop_df.set_index(['north', 'east'], inplace=True)
-    colored_df, merged_df = compute_parameters(gaz_df, pop_df, progress_callback=lambda x: None)
-    colored_df.to_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_COLORED_PATH)), index=False)
-    merged_df.to_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_COLORED_MERGED_PATH)), index=False)
+    return merged_colored_gaz_df

@@ -1,15 +1,17 @@
 import json
-import os
+import math
+import re
+
 import pandas as pd
 from tqdm import tqdm
-from config import *
+
 
 
 def grt_df_clean_up(df):
     # add "Provence-Alpes-Côte d'Azur" and "Alpes-Maritimes" for "nom_region" and "departement" of objectid 764
     df.loc[df['objectid'] == 764, 'nom_region'] = "Provence-Alpes-Côte d'Azur"
     df.loc[df['objectid'] == 764, 'departement'] = "Alpes-Maritimes"
-    
+
     # add "Provence-Alpes-Côte d'Azur" and "Alpes-Maritimes" for "nom_region" and "departement" of objectid 958
     df.loc[df['objectid'] == 958, 'nom_region'] = "Provence-Alpes-Côte d'Azur"
     df.loc[df['objectid'] == 958, 'departement'] = "Alpes-Maritimes"
@@ -18,12 +20,18 @@ def grt_df_clean_up(df):
     df.loc[df['objectid'] == 8442, 'nom_region'] = "Provence-Alpes-Côte d'Azur"
     df.loc[df['objectid'] == 8442, 'departement'] = "Bouches-du-Rhône"
 
+    df = df[['nom_region', 'geo_shape']]
+    df = df.rename(columns={'nom_region': 'region'})
+
     return df
 
 
 def terega_df_clean_up(df):
     # delete row where geo_point_2d = 43.18000060207648, 0.008788065393684546
     df = df[df['geo_point_2d'] != '43.18000060207648, 0.008788065393684546']
+
+    df = df[['region', 'geo_shape']]
+
     return df
 
 
@@ -31,9 +39,11 @@ def extract_coordinates(geo_shape):
     shape = json.loads(geo_shape)
     coordinates = shape['coordinates']
     if shape['type'] == 'LineString':
-        return [(lat, lon) if len(coord) == 2 else (lat, lon, alt)[:2] for coord in coordinates for lon, lat, *alt in [coord]]
+        return [(lat, lon) if len(coord) == 2 else (lat, lon, alt)[:2] for coord in coordinates for lon, lat, *alt in
+                [coord]]
     elif shape['type'] == 'MultiLineString':
-        return [(lat, lon) if len(coord) == 2 else (lat, lon, alt)[:2] for line in coordinates for coord in line for lon, lat, *alt in [coord]]
+        return [(lat, lon) if len(coord) == 2 else (lat, lon, alt)[:2] for line in coordinates for coord in line for
+                lon, lat, *alt in [coord]]
     else:
         raise ValueError(f"Unsupported geometry type: {shape['type']}")
 
@@ -42,29 +52,49 @@ def create_segments(coordinates):
     return [(coordinates[i], coordinates[i + 1]) for i in range(len(coordinates) - 1)]
 
 
-def main():
-    df_grt = pd.read_csv(os.path.normpath(os.path.join('..', INIT_GRT_PATH)), delimiter=';')
-    df_terega = pd.read_csv(os.path.normpath(os.path.join('..', INIT_TEREGA_PATH)), delimiter=';')
+def calculate_length(coords):
+    point1, point2 = coords
+    return math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
 
+
+def process_gaz(df_grt, df_terega):
     # Manual cleaning of csv errors
     df_grt = grt_df_clean_up(df_grt)
     df_terega = terega_df_clean_up(df_terega)
 
-    df_terega_filtered = df_terega[['region', 'geo_shape']]
-    df_grt_filtered = df_grt[['nom_region', 'geo_shape']]
-    df_grt_filtered = df_grt_filtered.rename(columns={'nom_region': 'region'})
+    merged_df = pd.concat([df_grt, df_terega])
 
-    merged_df = pd.concat([df_grt_filtered, df_terega_filtered])
-
-    print("Processing data...")
     tqdm.pandas()
+    print("Extracting coordinates...", flush=True)
     merged_df['coordinates'] = merged_df['geo_shape'].progress_apply(extract_coordinates)
+    print("Creating segments...", flush=True)
     merged_df['segments'] = merged_df['coordinates'].progress_apply(create_segments)
 
     # Explode the segments into separate rows
-    df_segments = merged_df.explode('segments').drop(columns=['geo_shape', 'coordinates']).rename(columns={'segments': 'coordinates'})
-    df_segments.to_csv(os.path.normpath(os.path.join('..', GAZ_NETWORK_PATH)), index=False)
+    df_segments = merged_df.explode('segments').drop(columns=['geo_shape', 'coordinates']).rename(
+        columns={'segments': 'coordinates'})
+
+    print("Calculating segment lengths...", flush=True)
+    df_segments['length'] = df_segments['coordinates'].progress_apply(calculate_length)
+
+    return df_segments
 
 
-if __name__ == '__main__':
-    main()
+def process_pop(df):
+    def make_square(idcar):
+        match = re.search(r'N(\d+)E(\d+)', idcar)
+        return int(match.group(1)), int(match.group(2))
+
+    tqdm.pandas()
+    print("Making squares...", flush=True)
+    df[['north', 'east']] = df['idcar_200m'].progress_apply(lambda x: pd.Series(make_square(x)))
+
+    print("Indexing...", flush=True)
+    df.set_index(['north', 'east'], inplace=True)
+
+    print("Calculating density...", flush=True)
+    df['density'] = df['ind'].progress_apply(lambda x: 25 * x)
+
+    df.drop(columns=['idcar_200m', 'ind'], inplace=True)
+
+    return df
