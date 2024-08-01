@@ -10,7 +10,7 @@ class App(customtkinter.CTk):
     WIDTH = 1200
     HEIGHT = 800
 
-    def __init__(self, gaz_network_path, gaz_network_colored_path, gaz_network_colored_merged_path, pop_filtered_path,
+    def __init__(self, base_gaz_network_path, base_population_path, computed_gaz_network_path,
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title(App.APP_NAME)
@@ -21,11 +21,10 @@ class App(customtkinter.CTk):
         self.bind("<Command-w>", self.on_closing)
         self.createcommand('tk::mac::Quit', self.on_closing)
 
-        self.gaz_network = pd.read_csv(gaz_network_path)
-        self.colored_gaz_network = pd.read_csv(gaz_network_colored_path)
-        self.gaz_df = pd.read_csv(gaz_network_colored_merged_path)
-        self.pop_df = pd.read_csv(pop_filtered_path)
+        self.base_gaz_network_path = pd.read_csv(base_gaz_network_path)
+        self.pop_df = pd.read_csv(base_population_path)
         self.pop_df.set_index(['north', 'east'], inplace=True)
+        self.gaz_df = pd.read_csv(computed_gaz_network_path)
 
         self.loading_screen = None
         self.progress_var = None

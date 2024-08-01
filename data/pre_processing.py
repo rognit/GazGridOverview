@@ -3,8 +3,8 @@ import math
 import re
 
 import pandas as pd
+from pyproj import Geod
 from tqdm import tqdm
-
 
 
 def grt_df_clean_up(df):
@@ -52,12 +52,13 @@ def create_segments(coordinates):
     return [(coordinates[i], coordinates[i + 1]) for i in range(len(coordinates) - 1)]
 
 
-def calculate_length(coords):
-    point1, point2 = coords
-    return math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
-
-
 def process_gaz(df_grt, df_terega):
+    geod = Geod(ellps='WGS84')
+
+    def calculate_length(coords):
+        (lon1, lat1), (lon2, lat2) = coords
+        return geod.inv(lon1, lat1, lon2, lat2)[2]  # 0: Forward Azimuth, 1: Back Azimuth, 2: Distance
+
     # Manual cleaning of csv errors
     df_grt = grt_df_clean_up(df_grt)
     df_terega = terega_df_clean_up(df_terega)

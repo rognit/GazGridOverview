@@ -11,10 +11,9 @@ from config import *
 
 def merge_region_color_segments(df):
     def parse_segment(segment):
-        return ast.literal_eval(segment.strip())
+        return ast.literal_eval(segment.strip()) if isinstance(segment, str) else segment
 
-    #segments = [parse_segment(segment) for segment in df['coordinates']]
-    segments = [segment for segment in df['coordinates']]
+    segments = [parse_segment(segment) for segment in df['coordinates']]
 
     paths = []
 
@@ -235,10 +234,9 @@ def compute_parameters(gaz_df, pop_df,
 
     def get_color_from_segment(segment):
 
-        #print([segment])
-        ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in segment)
-        #((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in ast.literal_eval(segment))  # ast.literal_eval
-        # because coordinates is a string
+        ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in
+                                (ast.literal_eval(segment) if isinstance(segment, str) else segment))
+        # ast.literal_eval because coordinates is a string
 
         segment_squares = (get_squares_from_vertex(x1, y1) | get_squares_from_edge(x1, y1, x2, y2) |
                            get_squares_from_vertex(x2, y2))
