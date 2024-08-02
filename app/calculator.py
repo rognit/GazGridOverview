@@ -1,6 +1,5 @@
 import math
 import ast
-import os
 
 import pandas as pd
 from tqdm import tqdm
@@ -13,64 +12,52 @@ def merge_region_color_segments(df):
     def parse_segment(segment):
         return ast.literal_eval(segment.strip()) if isinstance(segment, str) else segment
 
-    segments = [parse_segment(segment) for segment in df['coordinates']]
+    def comon_point(seg0, group):
+        for seg in group:
+            if seg0[0] in seg or seg0[1] in seg:
+                return True
+        return False
+
+    def recursive_merge(paths):
+        for i, path1 in enumerate(paths):
+            for j, path2 in enumerate(paths):
+                if i != j:
+                    if path1[-1] == path2[0]:
+                        return recursive_merge(
+                            [path for k, path in enumerate(paths) if i != k != j] + [path1 + path2[1:]])
+                    elif path1[0] == path2[-1]:
+                        return recursive_merge(
+                            [path for k, path in enumerate(paths) if i != k != j] + [path2 + path1[1:]])
+                    elif path1[0] == path2[0]:
+                        return recursive_merge(
+                            [path for k, path in enumerate(paths) if i != k != j] + [path2[::-1] + path1[1:]])
+                    elif path1[-1] == path2[-1]:
+                        return recursive_merge(
+                            [path for k, path in enumerate(paths) if i != k != j] + [path1 + path2[::-1][1:]])
+        return paths
+
+    # Making groups of segment that share at least one comon point
+    groups = []
+    for row in df.itertuples():
+        seg0 = parse_segment(row.coordinates)
+        relevant_groups = []
+        for i, group in enumerate(groups):
+            if comon_point(seg0, group):
+                relevant_groups.append(i)
+        if relevant_groups:
+            new_group = [seg0]
+            for i in sorted(relevant_groups, reverse=True):
+                new_group.extend(groups.pop(i))
+            groups.append(new_group)
+        else:
+            groups.append([seg0])
+
+    # Merge segments into a minimum of paths
 
     paths = []
-
-    for seg in segments:
-        merged = False
-        for path in paths:
-            if seg[0] == path[-1]:
-                path.append(seg[1])
-                merged = True
-                break
-            elif seg[1] == path[0]:
-                path.insert(0, seg[0])
-                merged = True
-                break
-            elif seg[1] == path[-1]:
-                path.append(seg[0])
-                merged = True
-                break
-            elif seg[0] == path[0]:
-                path.insert(0, seg[1])
-                merged = True
-                break
-        if not merged:
-            paths.append(list(seg))
-
-    # Merging connected paths
-    merged_sections = []
-    while paths:
-        current_path = paths.pop(0)
-        merged = False
-        for i, path in enumerate(paths):
-            if current_path[-1] == path[0]:
-                current_path.extend(path[1:])
-                paths.pop(i)
-                merged = True
-                break
-            elif current_path[0] == path[-1]:
-                current_path = path[:-1] + current_path
-                paths.pop(i)
-                merged = True
-                break
-            elif current_path[-1] == path[-1]:
-                current_path.extend(reversed(path[:-1]))
-                paths.pop(i)
-                merged = True
-                break
-            elif current_path[0] == path[0]:
-                current_path = list(reversed(path[1:])) + current_path
-                paths.pop(i)
-                merged = True
-                break
-        if merged:
-            paths.append(current_path)
-        else:
-            merged_sections.append(current_path)
-
-    return merged_sections
+    for group in groups:
+        paths.extend(map(list, recursive_merge(group)))
+    return paths
 
 
 def merge_all_segments(df):
@@ -83,7 +70,8 @@ def merge_all_segments(df):
             for segment in merged_segments:
                 merged_section.append({'region': region, 'color': color, 'coordinates': segment})
 
-    return pd.DataFrame(merged_section)
+    out = pd.DataFrame(merged_section)
+    return out
 
 
 def compute_parameters(gaz_df, pop_df,
@@ -236,7 +224,6 @@ def compute_parameters(gaz_df, pop_df,
 
         ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in
                                 (ast.literal_eval(segment) if isinstance(segment, str) else segment))
-        # ast.literal_eval because coordinates is a string
 
         segment_squares = (get_squares_from_vertex(x1, y1) | get_squares_from_edge(x1, y1, x2, y2) |
                            get_squares_from_vertex(x2, y2))

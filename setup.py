@@ -3,8 +3,8 @@ import os
 import pandas as pd
 
 from config import *
-from data.calculator import compute_parameters
-from data.pre_processing import process_gaz, process_pop
+from app.calculator import compute_parameters
+from app.pre_processing import process_gaz, process_pop
 
 
 def main():

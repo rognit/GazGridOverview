@@ -1,9 +1,8 @@
 # callbacks.py
 import ast
 import customtkinter
-import pandas as pd
 
-from data.calculator import compute_parameters
+from app.calculator import compute_parameters
 
 
 def search_event(app, event=None):
