@@ -55,7 +55,7 @@ def process_gaz(df_grt, df_terega):
     geod = Geod(ellps='WGS84')
 
     def calculate_length(coords):
-        (lon1, lat1), (lon2, lat2) = coords
+        (lat1, lon1), (lat2, lon2) = coords
         return geod.inv(lon1, lat1, lon2, lat2)[2]  # 0: Forward Azimuth, 1: Back Azimuth, 2: Distance
 
     # Manual cleaning of csv errors
@@ -72,10 +72,11 @@ def process_gaz(df_grt, df_terega):
 
     # Explode the segments into separate rows
     df_segments = merged_df.explode('segments').drop(columns=['geo_shape', 'coordinates']).rename(
-        columns={'segments': 'coordinates'})
+        columns={'segments': 'coordinates'}).reset_index(drop=True)
 
     print("Calculating segment lengths...", flush=True)
     df_segments['length'] = df_segments['coordinates'].progress_apply(calculate_length)
+    print(df_segments['length'].sum())
 
     return df_segments
 

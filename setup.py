@@ -60,6 +60,7 @@ def main():
     computed_df = compute_parameters(df_gaz, df_pop, progress_callback=lambda x: None)
 
     computed_df.to_csv(os.path.normpath(COMPUTED_GAZ_NETWORK_PATH), index=False)
+    print(len(computed_df), "rows saved to", COMPUTED_GAZ_NETWORK_PATH)
 
     print("\n\nSetup completed successfully!\n\n")
 

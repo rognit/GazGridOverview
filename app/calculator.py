@@ -79,6 +79,11 @@ def compute_parameters(gaz_df, pop_df,
                        orange_threshold=ORANGE_THRESHOLD,
                        red_threshold=RED_THRESHOLD,
                        progress_callback=None):
+
+    # print all the parameters
+    gaz_df.to_csv('test2setup.csv', index=False)
+
+
     square_size = SQUARE_SIZE
     squared_buffer_distance = buffer_distance ** 2
 
@@ -249,5 +254,5 @@ def compute_parameters(gaz_df, pop_df,
     merged_colored_gaz_df = merge_all_segments(colored_gaz_df)
 
     progress_callback(100)
-
+    print(f"Computed {len(merged_colored_gaz_df)} segments!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     return merged_colored_gaz_df

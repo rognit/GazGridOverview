@@ -55,9 +55,8 @@ class App(customtkinter.CTk):
 
         region_counts = {region: len(self.region_dfs_gaz[region]) for region in regions}
         self.region_display_names_gaz = {region: f"{region} ({count})" for region, count in region_counts.items()}
-        #self.display_to_region_gaz = {v: k for k, v in self.region_display_names_gaz.items()}
 
-
+        # Refreshing the display of region labels because their paths number has surely changed
         if hasattr(self, 'region_checkboxes_gaz'):
             for region, display_name in self.region_display_names_gaz.items():
                 if region in self.region_checkboxes_gaz:

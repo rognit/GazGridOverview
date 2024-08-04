@@ -40,10 +40,10 @@ def recalculate_segments(app):
     app.gaz_df = compute_parameters(
         app.base_gaz_network_path,
         app.pop_df,
-        buffer_distance,
-        orange_threshold,
-        red_threshold,
-        app.update_progress
+        buffer_distance=buffer_distance,
+        orange_threshold=orange_threshold,
+        red_threshold=red_threshold,
+        progress_callback=app.update_progress
     )
 
     app.extract_regions()
