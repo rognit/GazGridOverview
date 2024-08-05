@@ -7,6 +7,15 @@ from pyproj import CRS, Transformer
 
 from config import *
 
+def extract_vertices(df_gaz):
+    vertices = []
+    for row in df_gaz.itertuples():
+        p1, p2 = ast.literal_eval(row.coordinates)
+        vertices.append(p1)
+        vertices.append(p2)
+    return vertices
+
+
 
 def merge_region_color_segments(df):
     def parse_segment(segment):
@@ -53,12 +62,10 @@ def merge_region_color_segments(df):
             groups.append([seg0])
 
     # Merge segments into a minimum of paths
-
     paths = []
     for group in groups:
         paths.extend(map(list, recursive_merge(group)))
     return paths
-
 
 def merge_all_segments(df):
     merged_section = []
@@ -67,22 +74,17 @@ def merge_all_segments(df):
         for color in region_df['color'].unique():
             color_df = region_df[region_df['color'] == color]
             merged_segments = merge_region_color_segments(color_df)
-            for segment in merged_segments:
-                merged_section.append({'region': region, 'color': color, 'coordinates': segment})
+            for section in merged_segments:
+                merged_section.append({'region': region, 'color': color, 'coordinates': section, 'length': length})
 
     out = pd.DataFrame(merged_section)
     return out
-
 
 def compute_parameters(gaz_df, pop_df,
                        buffer_distance=BUFFER_DISTANCE,
                        orange_threshold=ORANGE_THRESHOLD,
                        red_threshold=RED_THRESHOLD,
                        progress_callback=None):
-
-    # print all the parameters
-    gaz_df.to_csv('test2setup.csv', index=False)
-
 
     square_size = SQUARE_SIZE
     squared_buffer_distance = buffer_distance ** 2
@@ -249,10 +251,11 @@ def compute_parameters(gaz_df, pop_df,
     color_order = pd.CategoricalDtype(categories=['green', 'orange', 'red'], ordered=True)
     colored_gaz_df['color'] = colored_gaz_df['color'].astype(color_order)
 
-    colored_gaz_df = colored_gaz_df.sort_values(by=['region', 'color'])  # Sort by color because Green < Orange < Red
+    colored_gaz_df = colored_gaz_df.sort_values(by=['region', 'color'])  # Because we want to draw Green under Orange
+    # under Red
 
     merged_colored_gaz_df = merge_all_segments(colored_gaz_df)
 
     progress_callback(100)
-    print(f"Computed {len(merged_colored_gaz_df)} segments!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
     return merged_colored_gaz_df

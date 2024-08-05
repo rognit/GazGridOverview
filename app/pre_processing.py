@@ -6,52 +6,52 @@ from pyproj import Geod
 from tqdm import tqdm
 
 
-def grt_df_clean_up(df):
-    # add "Provence-Alpes-Côte d'Azur" and "Alpes-Maritimes" for "nom_region" and "departement" of objectid 764
-    df.loc[df['objectid'] == 764, 'nom_region'] = "Provence-Alpes-Côte d'Azur"
-    df.loc[df['objectid'] == 764, 'departement'] = "Alpes-Maritimes"
 
-    # add "Provence-Alpes-Côte d'Azur" and "Alpes-Maritimes" for "nom_region" and "departement" of objectid 958
-    df.loc[df['objectid'] == 958, 'nom_region'] = "Provence-Alpes-Côte d'Azur"
-    df.loc[df['objectid'] == 958, 'departement'] = "Alpes-Maritimes"
-
-    # add "Provence-Alpes-Côte d'Azur" and "Bouches-du-Rhône" for "nom_region" and "departement" of objectid 8442
-    df.loc[df['objectid'] == 8442, 'nom_region'] = "Provence-Alpes-Côte d'Azur"
-    df.loc[df['objectid'] == 8442, 'departement'] = "Bouches-du-Rhône"
-
-    df = df[['nom_region', 'geo_shape']]
-    df = df.rename(columns={'nom_region': 'region'})
-
-    return df
-
-
-def terega_df_clean_up(df):
-    # delete row where geo_point_2d = 43.18000060207648, 0.008788065393684546
-    df = df[df['geo_point_2d'] != '43.18000060207648, 0.008788065393684546']
-
-    df = df[['region', 'geo_shape']]
-
-    return df
-
-
-def extract_coordinates(geo_shape):
-    shape = json.loads(geo_shape)
-    coordinates = shape['coordinates']
-    if shape['type'] == 'LineString':
-        return [(lat, lon) if len(coord) == 2 else (lat, lon, alt)[:2] for coord in coordinates for lon, lat, *alt in
-                [coord]]
-    elif shape['type'] == 'MultiLineString':
-        return [(lat, lon) if len(coord) == 2 else (lat, lon, alt)[:2] for line in coordinates for coord in line for
-                lon, lat, *alt in [coord]]
-    else:
-        raise ValueError(f"Unsupported geometry type: {shape['type']}")
-
-
-def create_segments(coordinates):
-    return [(coordinates[i], coordinates[i + 1]) for i in range(len(coordinates) - 1)]
 
 
 def process_gaz(df_grt, df_terega):
+    def grt_df_clean_up(df):
+        # add "Provence-Alpes-Côte d'Azur" and "Alpes-Maritimes" for "nom_region" and "departement" of objectid 764
+        df.loc[df['objectid'] == 764, 'nom_region'] = "Provence-Alpes-Côte d'Azur"
+        df.loc[df['objectid'] == 764, 'departement'] = "Alpes-Maritimes"
+
+        # add "Provence-Alpes-Côte d'Azur" and "Alpes-Maritimes" for "nom_region" and "departement" of objectid 958
+        df.loc[df['objectid'] == 958, 'nom_region'] = "Provence-Alpes-Côte d'Azur"
+        df.loc[df['objectid'] == 958, 'departement'] = "Alpes-Maritimes"
+
+        # add "Provence-Alpes-Côte d'Azur" and "Bouches-du-Rhône" for "nom_region" and "departement" of objectid 8442
+        df.loc[df['objectid'] == 8442, 'nom_region'] = "Provence-Alpes-Côte d'Azur"
+        df.loc[df['objectid'] == 8442, 'departement'] = "Bouches-du-Rhône"
+
+        df = df[['nom_region', 'geo_shape']]
+        df = df.rename(columns={'nom_region': 'region'})
+
+        return df
+
+    def terega_df_clean_up(df):
+        # delete row where geo_point_2d = 43.18000060207648, 0.008788065393684546
+        df = df[df['geo_point_2d'] != '43.18000060207648, 0.008788065393684546']
+
+        df = df[['region', 'geo_shape']]
+
+        return df
+
+    def extract_coordinates(geo_shape):
+        shape = json.loads(geo_shape)
+        coordinates = shape['coordinates']
+        if shape['type'] == 'LineString':
+            return [(lat, lon) if len(coord) == 2 else (lat, lon, alt)[:2] for coord in coordinates for lon, lat, *alt
+                    in
+                    [coord]]
+        elif shape['type'] == 'MultiLineString':
+            return [(lat, lon) if len(coord) == 2 else (lat, lon, alt)[:2] for line in coordinates for coord in line for
+                    lon, lat, *alt in [coord]]
+        else:
+            raise ValueError(f"Unsupported geometry type: {shape['type']}")
+
+    def create_segments(coordinates):
+        return [(coordinates[i], coordinates[i + 1]) for i in range(len(coordinates) - 1)]
+
     geod = Geod(ellps='WGS84')
 
     def calculate_length(coords):
@@ -76,7 +76,6 @@ def process_gaz(df_grt, df_terega):
 
     print("Calculating segment lengths...", flush=True)
     df_segments['length'] = df_segments['coordinates'].progress_apply(calculate_length)
-    print(df_segments['length'].sum())
 
     return df_segments
 
