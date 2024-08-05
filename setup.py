@@ -1,18 +1,14 @@
 import os
-import re
-import pandas as pd
-from tqdm import tqdm
 
-from config import POPULATION_PATH, INIT_POPULATION_PATH
+import pandas as pd
+
+from config import *
+from app.calculator import compute_parameters
+from app.pre_processing import process_gaz, process_pop
 
 
 def main():
-
-    def make_square(idcar):
-        match = re.search(r'N(\d+)E(\d+)', idcar)
-        return int(match.group(1)), int(match.group(2))
-
-    dtype_dict = {
+    dtype_pop_dict = {
         'idcar_200m': str,
         'idcar_1km': str,
         'idcar_nat': str,
@@ -49,18 +45,23 @@ def main():
         'ind_inc': float
     }
 
-    df = pd.read_csv(os.path.normpath(os.path.join('..', POPULATION_PATH)), dtype=dtype_dict)[['idcar_200m', 'ind']].copy()
+    raw_df_pop = pd.read_csv(os.path.normpath(INIT_POPULATION_PATH), dtype=dtype_pop_dict)[
+        ['idcar_200m', 'ind']].copy()
+    raw_df_grt = pd.read_csv(os.path.normpath(INIT_GRT_PATH), delimiter=';')
+    raw_df_terega = pd.read_csv(os.path.normpath(INIT_TEREGA_PATH), delimiter=';')
 
-    print("Processing data...")
-    tqdm.pandas()
-    df[['north', 'east']] = df['idcar_200m'].progress_apply(lambda x: pd.Series(make_square(x)))
-    df.set_index(['north', 'east'], inplace=True)
+    df_gaz = process_gaz(raw_df_grt, raw_df_terega)
+    df_pop = process_pop(raw_df_pop)
 
-    df['density'] = df['ind'].progress_apply(lambda x: 25 * x)
+    df_gaz.to_csv(os.path.normpath(BASE_GAZ_NETWORK_PATH), index=False)
+    df_pop.to_csv(os.path.normpath(BASE_POPULATION_PATH))
 
-    df.drop(columns=['idcar_200m', 'ind'], inplace=True)
+    print("Initial computing with preset parameters...")
+    computed_df = compute_parameters(df_gaz, df_pop, progress_callback=lambda x: None)
 
-    df.to_csv(os.path.normpath(os.path.join('..', INIT_POPULATION_PATH)))
+    computed_df.to_csv(os.path.normpath(COMPUTED_GAZ_NETWORK_PATH), index=False)
+
+    print("\n\nSetup completed successfully!\n\n")
 
 
 if __name__ == '__main__':

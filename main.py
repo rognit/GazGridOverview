@@ -14,9 +14,8 @@ def resource_path(relative_path):
 
 if __name__ == "__main__":
     app = App(
-        resource_path(GAZ_NETWORK_PATH),
-        resource_path(GAZ_NETWORK_COLORED_PATH),
-        resource_path(GAZ_NETWORK_COLORED_MERGED_PATH),
-        resource_path(POPULATION_PATH)
+        resource_path(BASE_GAZ_NETWORK_PATH),
+        resource_path(BASE_POPULATION_PATH),
+        resource_path(COMPUTED_GAZ_NETWORK_PATH)
     )
     app.start()

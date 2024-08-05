@@ -2,7 +2,7 @@
 import ast
 import customtkinter
 
-from data.calculator import compute_parameters
+from app.calculator import compute_parameters
 
 
 def search_event(app, event=None):
@@ -37,17 +37,15 @@ def recalculate_segments(app):
     orange_threshold = int(app.orange_threshold_entry.get())
     red_threshold = int(app.red_threshold_entry.get())
 
-    app.colored_gaz_network, app.gaz_df = compute_parameters(
-        app.gaz_network,
+    app.gaz_df = compute_parameters(
+        app.base_gaz_network_path,
         app.pop_df,
-        buffer_distance,
-        orange_threshold,
-        red_threshold,
-        app.update_progress  # Pass the update_progress method
+        buffer_distance=buffer_distance,
+        orange_threshold=orange_threshold,
+        red_threshold=red_threshold,
+        progress_callback=app.update_progress
     )
 
     app.extract_regions()
-    print('\ndebut')
     change_region(app)
-    print('fin')
     app.hide_loading_screen()
