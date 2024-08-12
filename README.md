@@ -100,3 +100,8 @@ pyinstaller --onefile --windowed --add-data 'resources/base_gaz_network.csv:reso
 ```
 
 The build file will then be located in the `dist/` folder.
+
+
+
+
+clic droit: on a les coordonnées

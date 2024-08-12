@@ -64,17 +64,18 @@ def process_gaz(df_grt, df_terega):
 
     merged_df = pd.concat([df_grt, df_terega])
 
-    tqdm.pandas()
-    print("Extracting coordinates...", flush=True)
+    tqdm.pandas(desc="Extracting coordinates")
     merged_df['coordinates'] = merged_df['geo_shape'].progress_apply(extract_coordinates)
-    print("Creating segments...", flush=True)
+
+    tqdm.pandas(desc="Creating segments")
     merged_df['segments'] = merged_df['coordinates'].progress_apply(create_segments)
 
     # Explode the segments into separate rows
+    print("Exploding segments...", flush=True)
     df_segments = merged_df.explode('segments').drop(columns=['geo_shape', 'coordinates']).rename(
         columns={'segments': 'coordinates'}).reset_index(drop=True)
 
-    print("Calculating segment lengths...", flush=True)
+    tqdm.pandas(desc="Calculating segment lengths")
     df_segments['length'] = df_segments['coordinates'].progress_apply(calculate_length)
 
     return df_segments
@@ -85,16 +86,16 @@ def process_pop(df):
         match = re.search(r'N(\d+)E(\d+)', idcar)
         return int(match.group(1)), int(match.group(2))
 
-    tqdm.pandas()
-    print("Making squares...", flush=True)
+    tqdm.pandas(desc="Making squares")
     df[['north', 'east']] = df['idcar_200m'].progress_apply(lambda x: pd.Series(make_square(x)))
 
-    print("Indexing...", flush=True)
+    tqdm.pandas(desc="Indexing")
     df.set_index(['north', 'east'], inplace=True)
 
-    print("Calculating density...", flush=True)
+    tqdm.pandas(desc="Calculating density")
     df['density'] = df['ind'].progress_apply(lambda x: 25 * x)
 
     df.drop(columns=['idcar_200m', 'ind'], inplace=True)
 
     return df
+

@@ -2,7 +2,7 @@
 import ast
 import customtkinter
 
-from app.calculator import compute_parameters
+from app.core_logic.calculator import compute_parameters
 
 
 def search_event(app, event=None):

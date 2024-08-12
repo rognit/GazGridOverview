@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 from config import *
-from app.calculator import compute_parameters
+from app.core_logic.calculator import compute_parameters
 from app.pre_processing import process_gaz, process_pop
 
 
