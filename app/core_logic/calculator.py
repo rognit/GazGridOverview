@@ -5,6 +5,7 @@ import pandas as pd
 from pyproj import CRS, Transformer
 
 from app.core_logic.path_maker import merge_all_segments
+from app.core_logic.segment_merger import simplify_segments
 from config import *
 
 
@@ -180,8 +181,13 @@ def compute_parameters(gaz_df, pop_df,
     colored_gaz_df = colored_gaz_df.sort_values(by=['region', 'color'])  # Because we want to draw Green under Orange
     # under Red
 
-    merged_colored_gaz_df = merge_all_segments(colored_gaz_df)
+    simplified_gaz_df = simplify_segments(colored_gaz_df)
+    simplified_gaz_df['color'] = 'blue'
+
+    simplified_gaz_df = merge_all_segments(simplified_gaz_df)
+
+    exhaustive_gaz_df = merge_all_segments(colored_gaz_df)
 
     progress_callback(100)
 
-    return merged_colored_gaz_df
+    return simplified_gaz_df, exhaustive_gaz_df
