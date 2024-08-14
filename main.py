@@ -16,6 +16,7 @@ if __name__ == "__main__":
     app = App(
         resource_path(BASE_GAZ_NETWORK_PATH),
         resource_path(BASE_POPULATION_PATH),
-        resource_path(COMPUTED_GAZ_NETWORK_PATH)
+        resource_path(SIMPLIFIED_COMPUTED_GAZ_NETWORK_PATH),
+        resource_path(EXHAUSTIVE_COMPUTED_GAZ_NETWORK_PATH)
     )
     app.start()

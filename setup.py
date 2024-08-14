@@ -4,7 +4,7 @@ import pandas as pd
 
 from config import *
 from app.core_logic.calculator import compute_parameters
-from app.pre_processing import process_gaz, process_pop
+from app.core_logic.csv_pre_processing import process_gaz, process_pop
 
 
 def main():
@@ -45,8 +45,7 @@ def main():
         'ind_inc': float
     }
 
-    raw_df_pop = pd.read_csv(os.path.normpath(INIT_POPULATION_PATH), dtype=dtype_pop_dict)[
-        ['idcar_200m', 'ind']].copy()
+    raw_df_pop = pd.read_csv(os.path.normpath(INIT_POPULATION_PATH), dtype=dtype_pop_dict)[['idcar_200m', 'ind']].copy()
     raw_df_grt = pd.read_csv(os.path.normpath(INIT_GRT_PATH), delimiter=';')
     raw_df_terega = pd.read_csv(os.path.normpath(INIT_TEREGA_PATH), delimiter=';')
 
@@ -57,9 +56,10 @@ def main():
     df_pop.to_csv(os.path.normpath(BASE_POPULATION_PATH))
 
     print("Initial computing with preset parameters...")
-    computed_df = compute_parameters(df_gaz, df_pop, progress_callback=lambda x: None)
+    simplified_computed_df, exhaustive_computed_df = compute_parameters(df_gaz, df_pop, progress_callback=lambda x: None)
 
-    computed_df.to_csv(os.path.normpath(COMPUTED_GAZ_NETWORK_PATH), index=False)
+    simplified_computed_df.to_csv(os.path.normpath(SIMPLIFIED_COMPUTED_GAZ_NETWORK_PATH), index=False)
+    exhaustive_computed_df.to_csv(os.path.normpath(EXHAUSTIVE_COMPUTED_GAZ_NETWORK_PATH), index=False)
 
     print("\n\nSetup completed successfully!\n\n")
 

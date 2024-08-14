@@ -1,17 +1,20 @@
 import customtkinter
 import pandas as pd
+
+from threading import Thread
 from tkintermapview import TkinterMapView
-from app.callbacks import change_region, change_map, change_appearance_mode, search_event, recalculate_segments
 from tkinter import ttk
-import threading
+
+from app.callbacks import change_region, change_map, change_appearance_mode, search_event, recalculate_segments, toggle_view_mode
+
 
 class App(customtkinter.CTk):
     APP_NAME = "Gaz Grid Overview"
     WIDTH = 1200
     HEIGHT = 800
 
-    def __init__(self, base_gaz_network_path, base_population_path, computed_gaz_network_path,
-                 *args, **kwargs):
+    def __init__(self, base_gaz_network_path, base_population_path, simplified_gaz_network_path,
+                 exhaustive_gaz_network_path, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title(App.APP_NAME)
         self.geometry(str(App.WIDTH) + "x" + str(App.HEIGHT))
@@ -22,9 +25,18 @@ class App(customtkinter.CTk):
         self.createcommand('tk::mac::Quit', self.on_closing)
 
         self.base_gaz_network_path = pd.read_csv(base_gaz_network_path)
+        self.base_gaz_network_path['coordinates'] = self.base_gaz_network_path['coordinates'].apply(lambda x: eval(x))
+
         self.pop_df = pd.read_csv(base_population_path)
         self.pop_df.set_index(['north', 'east'], inplace=True)
-        self.gaz_df = pd.read_csv(computed_gaz_network_path)
+
+        self.simplified_gaz_df = pd.read_csv(simplified_gaz_network_path)
+        self.simplified_gaz_df['coordinates'] = self.simplified_gaz_df['coordinates'].apply(lambda x: eval(x))
+
+        self.exhaustive_gaz_df = pd.read_csv(exhaustive_gaz_network_path)
+        self.exhaustive_gaz_df['coordinates'] = self.exhaustive_gaz_df['coordinates'].apply(lambda x: eval(x))
+
+        self.gaz_df = self.exhaustive_gaz_df
 
         self.loading_screen = None
         self.progress_var = None
@@ -66,17 +78,23 @@ class App(customtkinter.CTk):
         self.frame_left.grid_rowconfigure(0, weight=0)
         self.frame_left.grid_rowconfigure(1, weight=0)
         self.frame_left.grid_rowconfigure(2, weight=0)
-        self.frame_left.grid_rowconfigure(3, weight=1)
-        self.frame_left.grid_rowconfigure(4, weight=0)
+        self.frame_left.grid_rowconfigure(3, weight=0)
+        self.frame_left.grid_rowconfigure(4, weight=1)
+        self.frame_left.grid_rowconfigure(5, weight=0)
         self.frame_left.grid_columnconfigure(0, weight=1)
         self.frame_left.grid_columnconfigure(1, weight=1)
 
+        self.view_mode = "exhaustive"
+        self.toggle_button = customtkinter.CTkButton(self.frame_left, text="Switch to Simplified View",
+                                                     command=lambda: toggle_view_mode(self))  # Corrected line
+        self.toggle_button.grid(row=0, column=0, columnspan=2, padx=(20, 20), pady=(20, 10))
+
         self.region_label_gaz = customtkinter.CTkLabel(self.frame_left, text="Select regions", anchor="center",
                                                        font=("Helvetica", 16, "bold"))
-        self.region_label_gaz.grid(row=0, column=0, columnspan=2, padx=(20, 20), pady=(20, 10))
+        self.region_label_gaz.grid(row=1, column=0, columnspan=2, padx=(20, 20), pady=(10, 10))
 
         self.region_frame_gaz = customtkinter.CTkFrame(self.frame_left, fg_color=None)
-        self.region_frame_gaz.grid(row=1, column=0, columnspan=2, padx=(20, 20), pady=(10, 20), sticky="n")
+        self.region_frame_gaz.grid(row=2, column=0, columnspan=2, padx=(20, 20), pady=(10, 20), sticky="n")
 
         self.region_checkboxes_gaz = {}
         for idx, (region, display_name) in enumerate(self.region_display_names_gaz.items()):
@@ -85,7 +103,7 @@ class App(customtkinter.CTk):
             self.region_checkboxes_gaz[region].grid(row=idx, column=0, padx=(0, 0), pady=(5, 0), sticky="w")
 
         self.param_frame = customtkinter.CTkFrame(self.frame_left, fg_color=None)
-        self.param_frame.grid(row=2, column=0, columnspan=2, padx=(20, 20), pady=(10, 20), sticky="n")
+        self.param_frame.grid(row=3, column=0, columnspan=2, padx=(20, 20), pady=(10, 20), sticky="n")
 
         self.buffer_distance_label = customtkinter.CTkLabel(self.param_frame, text="Buffer Distance:  ", anchor="w")
         self.buffer_distance_label.grid(row=0, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
@@ -125,11 +143,11 @@ class App(customtkinter.CTk):
 
         self.appearance_mode_label = customtkinter.CTkLabel(self.frame_left, text="Appearance:", anchor="w")
         self.appearance_mode_label.grid(row=5, column=0, padx=(20, 0), pady=(10, 10), sticky="s")
-        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.frame_left,
+        self.appearance_mode_option_menu = customtkinter.CTkOptionMenu(self.frame_left,
                                                                        values=["Light", "Dark", "System"],
                                                                        command=lambda mode: change_appearance_mode(self,
                                                                                                                    mode))
-        self.appearance_mode_optionemenu.grid(row=5, column=1, padx=(0, 20), pady=(10, 10), sticky="s")
+        self.appearance_mode_option_menu.grid(row=5, column=1, padx=(0, 20), pady=(10, 10), sticky="s")
 
     def create_right_frame(self):
         self.frame_right.grid_rowconfigure(1, weight=1)
@@ -153,7 +171,7 @@ class App(customtkinter.CTk):
         self.map_widget.set_position(47, 2.5, marker=False)
         self.map_widget.set_zoom(6)
         self.map_option_menu.set("OpenStreetMap")
-        self.appearance_mode_optionemenu.set("System")
+        self.appearance_mode_option_menu.set("System")
 
         self.buffer_distance_entry.insert(0, "200")
         self.orange_threshold_entry.insert(0, "250")
@@ -187,7 +205,7 @@ class App(customtkinter.CTk):
             self.region_checkboxes_gaz[checkbox].deselect()
         change_region(self)
         self.show_loading_screen()
-        thread = threading.Thread(target=self.run_recalculation)
+        thread = Thread(target=self.run_recalculation)
         thread.start()
 
     def run_recalculation(self):

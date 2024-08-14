@@ -96,7 +96,7 @@ python main.py
 ### Build version:
 
 ```bash
-pyinstaller --onefile --windowed --add-data 'resources/base_gaz_network.csv:resources' --add-data 'resources/base_population.csv:resources' --add-data 'resources/computed_gaz_network.csv:resources' --name GazGridOverview main.py
+pyinstaller --onefile --windowed --add-data 'resources/base_gaz_network.csv:resources' --add-data 'resources/base_population.csv:resources' --add-data 'resources/simplified_computed_gaz_network:resources' --add-data 'resources/exhaustive_computed_gaz_network:resources' --name GazGridOverview main.py
 ```
 
 The build file will then be located in the `dist/` folder.

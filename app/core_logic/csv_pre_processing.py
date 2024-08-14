@@ -46,8 +46,6 @@ def process_gaz(df_grt, df_terega):
         elif shape['type'] == 'MultiLineString':
             return [(lat, lon) if len(coord) == 2 else (lat, lon, alt)[:2] for line in coordinates for coord in line for
                     lon, lat, *alt in [coord]]
-        else:
-            raise ValueError(f"Unsupported geometry type: {shape['type']}")
 
     def create_segments(coordinates):
         return [(coordinates[i], coordinates[i + 1]) for i in range(len(coordinates) - 1)]
@@ -71,7 +69,6 @@ def process_gaz(df_grt, df_terega):
     merged_df['segments'] = merged_df['coordinates'].progress_apply(create_segments)
 
     # Explode the segments into separate rows
-    print("Exploding segments...", flush=True)
     df_segments = merged_df.explode('segments').drop(columns=['geo_shape', 'coordinates']).rename(
         columns={'segments': 'coordinates'}).reset_index(drop=True)
 

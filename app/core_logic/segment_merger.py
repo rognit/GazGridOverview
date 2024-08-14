@@ -23,7 +23,7 @@ def cluster_points(df):
     graph = nx.Graph()
     # link nodes with segment size < MERGING_THRESHOLD
     for row in df.itertuples(index=False):
-        [start, end] = eval(row.coordinates)
+        [start, end] = row.coordinates
 
         if float(row.length) < MERGING_THRESHOLD:
             graph.add_edge(start, end)
@@ -63,27 +63,43 @@ def create_centroid_df(clusters):
 
 
 def simplify_segments(colored_gaz_df):
+    #colored_gaz_df['coordinates'] = colored_gaz_df['coordinates'].apply(lambda x: eval(x))
 
     centroid_df = create_centroid_df(refine_clusters(cluster_points(colored_gaz_df)))
+
+    centroid_df.to_csv("centroid.csv")
+    centroid_df.index = centroid_df.index.map(lambda x: tuple(map(float, x)))
+
 
     computed_gaz_df = pd.DataFrame(columns=['region', 'coordinates', 'lengths'])
     same_centroid = []
 
     for row in colored_gaz_df.itertuples(index=False):
-        region, (p1, p2), color, length = row
+        region, coordinates, length, color = row
+        #print(row)
+        p1, p2 = coordinates
         c1, c2 = centroid_df.loc[p1, 'centroid'], centroid_df.loc[p2, 'centroid']
         if c1 == c2:
+            #print("same centroid")
             same_centroid.append((c1, color, length))
         else:
+            #print("different centroid")
             if not computed_gaz_df['coordinates'].apply(lambda x: x == (c1, c2)).any():
+                #print("new row")
                 new_row = pd.DataFrame({
                     'region': [region],
                     'coordinates': [(c1, c2)],
                     'lengths': [{'red': 0, 'orange': 0, 'green': 0}]
                 })
                 computed_gaz_df = pd.concat([computed_gaz_df, new_row], ignore_index=True)
+            pd.set_option('display.max_columns', None)
+            pd.set_option('display.max_colwidth', None)
+            pd.set_option('display.width', None)
+            #print(computed_gaz_df)
 
             idx = computed_gaz_df[computed_gaz_df['coordinates'] == (c1, c2)].index[0]
+            #print(f"idx:{idx}")
+            #print(computed_gaz_df.at[idx, 'lengths'])
             computed_gaz_df.at[idx, 'lengths'][color] += length
 
     # Handle segments with same centroid
@@ -100,5 +116,7 @@ def simplify_segments(colored_gaz_df):
             # Distribute the length equally among all connected branches
             for idx in connected_branches.index:
                 computed_gaz_df.at[idx, 'lengths'][color] += length_per_branch
+
+    computed_gaz_df.to_csv("computed_gaz_df.csv")
 
     return computed_gaz_df

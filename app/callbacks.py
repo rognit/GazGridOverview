@@ -32,6 +32,20 @@ def change_appearance_mode(app, new_appearance_mode):
     customtkinter.set_appearance_mode(new_appearance_mode)
 
 
+def toggle_view_mode(self):
+    if self.view_mode == "simplified":
+        self.view_mode = "exhaustive"
+        self.gaz_df = self.exhaustive_gaz_df
+        self.toggle_button.configure(text="Switch to Simplified View")
+    else:
+        self.view_mode = "simplified"
+        self.gaz_df = self.simplified_gaz_df
+        self.toggle_button.configure(text="Switch to Exhaustive View")
+
+    self.extract_regions()
+    change_region(self)
+
+
 def recalculate_segments(app):
     buffer_distance = int(app.buffer_distance_entry.get())
     orange_threshold = int(app.orange_threshold_entry.get())

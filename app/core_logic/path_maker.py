@@ -5,7 +5,8 @@ import pandas as pd
 
 def merge_region_color_segments(df):
     def parse_segment(segment):
-        return ast.literal_eval(segment.strip()) if isinstance(segment, str) else segment
+        #return ast.literal_eval(segment.strip()) if isinstance(segment, str) else segment
+        return segment.strip()
 
     def comon_point(seg0, group):
         for seg in group:
@@ -34,7 +35,8 @@ def merge_region_color_segments(df):
     # Making groups of segment that share at least one comon point
     groups = []
     for row in df.itertuples():
-        seg0 = parse_segment(row.coordinates)
+        #seg0 = parse_segment(row.coordinates)
+        seg0 = row.coordinates
         relevant_groups = []
         for i, group in enumerate(groups):
             if comon_point(seg0, group):

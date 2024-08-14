@@ -157,8 +157,9 @@ def compute_parameters(gaz_df, pop_df,
 
     def get_color_from_segment(segment):
 
-        ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in
-                                (ast.literal_eval(segment) if isinstance(segment, str) else segment))
+        #((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in
+        #                        (ast.literal_eval(segment) if isinstance(segment, str) else segment))
+        ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in segment)
 
         segment_squares = (get_squares_from_vertex(x1, y1) | get_squares_from_edge(x1, y1, x2, y2) |
                            get_squares_from_vertex(x2, y2))
@@ -184,7 +185,7 @@ def compute_parameters(gaz_df, pop_df,
     simplified_gaz_df = simplify_segments(colored_gaz_df)
     simplified_gaz_df['color'] = 'blue'
 
-    simplified_gaz_df = merge_all_segments(simplified_gaz_df)
+    #simplified_gaz_df = merge_all_segments(simplified_gaz_df)
 
     exhaustive_gaz_df = merge_all_segments(colored_gaz_df)
 
