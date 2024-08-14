@@ -1,12 +1,11 @@
-import networkx as nx
+from scipy.spatial import cKDTree
 import numpy as np
 import pandas as pd
-
 from pyproj import Geod
 from tqdm import tqdm
 
+# Assuming MAX_MERGING_THRESHOLD and MERGING_THRESHOLD are defined in config
 from config import *
-
 
 geod = Geod(ellps='WGS84')
 
@@ -19,42 +18,54 @@ def calculate_centroid(points):
     return (np.mean([p[0] for p in points]), np.mean([p[1] for p in points]))
 
 
-def cluster_points(df):
-    graph = nx.Graph()
-    # link nodes with segment size < MERGING_THRESHOLD
-    for row in df.itertuples(index=False):
-        [start, end] = row.coordinates
+def make_clusters(df):
+    geod = Geod(ellps="WGS84")
 
-        if float(row.length) < MERGING_THRESHOLD:
-            graph.add_edge(start, end)
-        else:
-            graph.add_node(start)
-            graph.add_node(end)
+    coordinates = list(set([point for segment in df['coordinates'].tolist() for point in segment]))
 
-    return list(nx.connected_components(graph))
+    tree = cKDTree(coordinates)
+    # Approximate conversion from meters to degrees (1 degree ≈ 111km at the equator)
+    approx_distance_deg = MAX_MERGING_THRESHOLD / 111000
 
+    def calculate_length(coords):
+        (lat1, lon1), (lat2, lon2) = coords
+        return geod.inv(lon1, lat1, lon2, lat2)[2]  # 0: Forward Azimuth, 1: Back Azimuth, 2: Distance
 
-def refine_clusters(clusters):
-    refined_clusters = []
-    for cluster in clusters:
-        sub_clusters = []
-        points = list(cluster)
-        while points:  # pick one point and add as many points enough close to it
-            sub_cluster = [points.pop(0)]
-            i = 0
-            while i < len(points):
-                if all(calculate_length(*p, *points[i]) <= MERGING_THRESHOLD for p in sub_cluster):
-                    sub_cluster.append(points.pop(i))
-                else:
-                    i += 1
-            sub_clusters.append(sub_cluster)
-        refined_clusters.extend(sub_clusters)
-    return refined_clusters
+    def find_nearby_points(point):
+        potential_neighbors = tree.query_ball_point(point, r=approx_distance_deg)
+
+        nearby_points = []
+        for idx in potential_neighbors:
+            if coordinates[idx] != point and calculate_length((point, coordinates[idx])) <= MERGING_THRESHOLD:
+                nearby_points.append(coordinates[idx])
+        return nearby_points
+
+    visited = set()
+    clusters = []
+
+    for i, point in tqdm(enumerate(coordinates), desc="Clustering Points", total=len(coordinates)):
+        if i in visited:
+            continue
+
+        cluster = [point]
+        visited.add(i)
+
+        neighbors = find_nearby_points(point)
+
+        for neighbor in neighbors:
+            neighbor_idx = coordinates.index(neighbor)
+            if neighbor_idx not in visited:
+                cluster.append(neighbor)
+                visited.add(neighbor_idx)
+
+        clusters.append(cluster)
+
+    return clusters
 
 
 def create_centroid_df(clusters):
     centroid_dict = {}
-    for cluster in clusters:
+    for cluster in tqdm(clusters, desc="Calculating Centroids"):
         centroid = calculate_centroid(cluster)
         for point in cluster:
             centroid_dict[point] = centroid
@@ -63,47 +74,33 @@ def create_centroid_df(clusters):
 
 
 def simplify_segments(colored_gaz_df):
-    #colored_gaz_df['coordinates'] = colored_gaz_df['coordinates'].apply(lambda x: eval(x))
-
-    centroid_df = create_centroid_df(refine_clusters(cluster_points(colored_gaz_df)))
+    centroid_df = create_centroid_df(make_clusters(colored_gaz_df))
 
     centroid_df.to_csv("centroid.csv")
     centroid_df.index = centroid_df.index.map(lambda x: tuple(map(float, x)))
 
-
     computed_gaz_df = pd.DataFrame(columns=['region', 'coordinates', 'lengths'])
     same_centroid = []
 
-    for row in colored_gaz_df.itertuples(index=False):
-        region, coordinates, length, color = row
-        #print(row)
-        p1, p2 = coordinates
+    for row in tqdm(colored_gaz_df.itertuples(index=False), desc="Simplifying Segments", total=len(colored_gaz_df)):
+        region, (p1, p2), length, color = row
         c1, c2 = centroid_df.loc[p1, 'centroid'], centroid_df.loc[p2, 'centroid']
         if c1 == c2:
-            #print("same centroid")
             same_centroid.append((c1, color, length))
         else:
-            #print("different centroid")
             if not computed_gaz_df['coordinates'].apply(lambda x: x == (c1, c2)).any():
-                #print("new row")
                 new_row = pd.DataFrame({
                     'region': [region],
                     'coordinates': [(c1, c2)],
                     'lengths': [{'red': 0, 'orange': 0, 'green': 0}]
                 })
                 computed_gaz_df = pd.concat([computed_gaz_df, new_row], ignore_index=True)
-            pd.set_option('display.max_columns', None)
-            pd.set_option('display.max_colwidth', None)
-            pd.set_option('display.width', None)
-            #print(computed_gaz_df)
 
             idx = computed_gaz_df[computed_gaz_df['coordinates'] == (c1, c2)].index[0]
-            #print(f"idx:{idx}")
-            #print(computed_gaz_df.at[idx, 'lengths'])
             computed_gaz_df.at[idx, 'lengths'][color] += length
 
     # Handle segments with same centroid
-    for centroid, color, length in same_centroid:
+    for centroid, color, length in tqdm(same_centroid, desc="Handling Same Centroid Segments"):
         # Find all branches connected to this centroid
         connected_branches = computed_gaz_df[
             computed_gaz_df['coordinates'].apply(lambda x: centroid in x)

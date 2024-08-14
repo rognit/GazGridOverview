@@ -166,6 +166,22 @@ def compute_parameters(gaz_df, pop_df,
 
         return get_color_from_squares(segment_squares)
 
+    def choose_color(lengths):
+        match lengths['red'], lengths['orange'], lengths['green']:
+            case 0, 0, green if green > 0:
+                return 'green'
+            case 0, orange, 0 if orange > 0:
+                return 'orange'
+            case 0, orange, green if orange > 0 and green > 0:
+                return 'yellow'
+            case red, 0, 0 if red > 0:
+                return 'red'
+            case red, _, _:
+                return 'brown'
+            case _, _, _:
+                print(f"Unexpected lengths: {lengths}")
+                return 'red'
+
     colored_gaz_df = gaz_df.copy()
 
     total_segments = len(colored_gaz_df)
@@ -176,14 +192,14 @@ def compute_parameters(gaz_df, pop_df,
         colored_gaz_df.at[row.Index, 'color'] = color
         progress_callback(int((idx / total_segments) * 100))
 
-    color_order = pd.CategoricalDtype(categories=['green', 'orange', 'red'], ordered=True)
+    color_order = pd.CategoricalDtype(categories=['green', 'yellow' 'orange', 'brown', 'red'], ordered=True)
     colored_gaz_df['color'] = colored_gaz_df['color'].astype(color_order)
 
     colored_gaz_df = colored_gaz_df.sort_values(by=['region', 'color'])  # Because we want to draw Green under Orange
     # under Red
 
     simplified_gaz_df = simplify_segments(colored_gaz_df)
-    simplified_gaz_df['color'] = 'blue'
+    simplified_gaz_df['color'] = simplified_gaz_df['lengths'].apply(choose_color)
 
     #simplified_gaz_df = merge_all_segments(simplified_gaz_df)
 

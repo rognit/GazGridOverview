@@ -5,6 +5,7 @@ BUFFER_DISTANCE = 200  # meters
 ORANGE_THRESHOLD = 250  # people
 RED_THRESHOLD = 2500  # people
 MERGING_THRESHOLD = 50  # meters
+MAX_MERGING_THRESHOLD = 1000  # meters
 IGNORING_THRESHOLD = 600  # meters
 
 # initial raw data (before setup)
