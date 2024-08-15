@@ -3,6 +3,7 @@ import ast
 
 import pandas as pd
 from pyproj import CRS, Transformer
+from tqdm import tqdm
 
 from app.core_logic.path_maker import merge_all_segments
 from app.core_logic.segment_merger import simplify_segments
@@ -13,7 +14,8 @@ def compute_parameters(gaz_df, pop_df,
                        buffer_distance=BUFFER_DISTANCE,
                        orange_threshold=ORANGE_THRESHOLD,
                        red_threshold=RED_THRESHOLD,
-                       progress_callback=None):
+                       progress_callback=None,
+                       show_tqdm=False):
     square_size = SQUARE_SIZE
     squared_buffer_distance = buffer_distance ** 2
 
@@ -176,7 +178,7 @@ def compute_parameters(gaz_df, pop_df,
                 return 'yellow'
             case red, 0, 0 if red > 0:
                 return 'red'
-            case red, _, _:
+            case red, _, _ if red > 0:
                 return 'brown'
             case _, _, _:
                 print(f"Unexpected lengths: {lengths}")
@@ -187,23 +189,33 @@ def compute_parameters(gaz_df, pop_df,
     total_segments = len(colored_gaz_df)
     progress_callback(0)
 
-    for idx, row in enumerate(colored_gaz_df.itertuples()):
+    iterator = tqdm(enumerate(colored_gaz_df.itertuples()), desc="Calculating colors", total=total_segments) \
+        if show_tqdm else enumerate(colored_gaz_df.itertuples())
+    for idx, row in iterator:
         color = get_color_from_segment(row.coordinates)
         colored_gaz_df.at[row.Index, 'color'] = color
         progress_callback(int((idx / total_segments) * 100))
 
-    color_order = pd.CategoricalDtype(categories=['green', 'yellow' 'orange', 'brown', 'red'], ordered=True)
+    colored_gaz_df.to_csv("TEEEEST.csv")
+
+    color_order = pd.CategoricalDtype(categories=['green', 'orange', 'red'], ordered=True)
     colored_gaz_df['color'] = colored_gaz_df['color'].astype(color_order)
+
+    colored_gaz_df.to_csv("TEEEEST1.csv")
 
     colored_gaz_df = colored_gaz_df.sort_values(by=['region', 'color'])  # Because we want to draw Green under Orange
     # under Red
 
-    simplified_gaz_df = simplify_segments(colored_gaz_df)
+    colored_gaz_df.to_csv("TEEEEST2.csv")
+
+    simplified_gaz_df = simplify_segments(colored_gaz_df, show_tqdm)
     simplified_gaz_df['color'] = simplified_gaz_df['lengths'].apply(choose_color)
 
-    #simplified_gaz_df = merge_all_segments(simplified_gaz_df)
+    simplified_gaz_df = merge_all_segments(simplified_gaz_df, show_tqdm,
+                                           desc="Making paths for simplified segments region by region")
 
-    exhaustive_gaz_df = merge_all_segments(colored_gaz_df)
+    exhaustive_gaz_df = merge_all_segments(colored_gaz_df, show_tqdm,
+                                           desc="Making paths for exhaustive segments region by region")
 
     progress_callback(100)
 

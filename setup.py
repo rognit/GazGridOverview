@@ -56,7 +56,9 @@ def main():
     df_pop.to_csv(os.path.normpath(BASE_POPULATION_PATH))
 
     print("Initial computing with preset parameters...")
-    simplified_computed_df, exhaustive_computed_df = compute_parameters(df_gaz, df_pop, progress_callback=lambda x: None)
+    simplified_computed_df, exhaustive_computed_df = compute_parameters(df_gaz, df_pop,
+                                                                        progress_callback=lambda x: None,
+                                                                        show_tqdm=True)
 
     simplified_computed_df.to_csv(os.path.normpath(SIMPLIFIED_COMPUTED_GAZ_NETWORK_PATH), index=False)
     exhaustive_computed_df.to_csv(os.path.normpath(EXHAUSTIVE_COMPUTED_GAZ_NETWORK_PATH), index=False)

@@ -1,6 +1,7 @@
 import ast
 
 import pandas as pd
+from tqdm import tqdm
 
 
 def merge_region_color_segments(df):
@@ -56,8 +57,10 @@ def merge_region_color_segments(df):
     return paths
 
 
-def merge_all_segments(df):
+def merge_all_segments(df, show_tqdm, desc):
     merged_section = []
+    iterator = tqdm(df['region'].unique(), desc=desc, total=len(df['region'].unique())) \
+        if show_tqdm else df['region'].unique()
     for region in df['region'].unique():
         region_df = df[df['region'] == region]
         for color in region_df['color'].unique():
