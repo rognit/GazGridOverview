@@ -6,7 +6,7 @@ from tkintermapview import TkinterMapView
 from tkinter import ttk
 
 from app.callbacks import change_region, change_map, change_appearance_mode, search_event, recalculate_segments, toggle_view_mode
-from config import BUFFER_DISTANCE, ORANGE_THRESHOLD, RED_THRESHOLD, MERGING_THRESHOLD
+from config import *
 
 
 class App(customtkinter.CTk):
