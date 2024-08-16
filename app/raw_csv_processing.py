@@ -2,7 +2,6 @@ import json
 import re
 
 import pandas as pd
-from pyproj import Geod
 from tqdm import tqdm
 
 from app.tools import calculate_length

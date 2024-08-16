@@ -3,7 +3,7 @@ import pandas as pd
 
 from threading import Thread
 from tkintermapview import TkinterMapView
-from tkinter import ttk
+from tkinter import ttk, PhotoImage
 
 from app.callbacks import change_region, change_map, change_appearance_mode, search_event, recalculate_segments, toggle_view_mode
 from config import *
@@ -15,11 +15,12 @@ class App(customtkinter.CTk):
     HEIGHT = 950
 
     def __init__(self, base_gaz_network_path, base_population_path, simplified_gaz_network_path,
-                 exhaustive_gaz_network_path, information_path, *args, **kwargs):
+                 exhaustive_gaz_network_path, information_path, icon_path, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title(App.APP_NAME)
         self.geometry(str(App.WIDTH) + "x" + str(App.HEIGHT))
         self.minsize(App.WIDTH, self.HEIGHT)
+        self.iconbitmap(icon_path)
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind("<Command-q>", self.on_closing)
         self.bind("<Command-w>", self.on_closing)
@@ -249,5 +250,3 @@ class App(customtkinter.CTk):
 
     def start(self):
         self.mainloop()
-
-

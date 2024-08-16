@@ -1,7 +1,4 @@
-# callbacks.py
-import ast
 import customtkinter
-from scipy.interpolate import approximate_taylor_polynomial
 
 from app.core_logic.calculator import compute_parameters
 
@@ -15,9 +12,7 @@ def change_region(app):
     for region, checkbox in app.region_checkboxes_gaz.items():
         if checkbox.get():
             for index, row in app.region_dfs_gaz[region].iterrows():
-                coordinates = ast.literal_eval(row['coordinates']) if isinstance(row['coordinates'], str)\
-                    else row['coordinates']
-                app.map_widget.set_path(coordinates, color=row['color'])
+                app.map_widget.set_path(row['coordinates'], color=row['color'])
 
 
 def change_map(app, new_map):

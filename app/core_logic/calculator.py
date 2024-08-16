@@ -4,7 +4,6 @@ from app.core_logic.path_maker import make_paths
 from app.core_logic.network_simplifier import simplify_segments
 
 from app.core_logic.segment_colorist import color_segments
-from app.tools import calculate_length
 from config import *
 
 
