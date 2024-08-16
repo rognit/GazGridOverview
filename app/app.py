@@ -6,15 +6,16 @@ from tkintermapview import TkinterMapView
 from tkinter import ttk
 
 from app.callbacks import change_region, change_map, change_appearance_mode, search_event, recalculate_segments, toggle_view_mode
+from config import BUFFER_DISTANCE, ORANGE_THRESHOLD, RED_THRESHOLD, MERGING_THRESHOLD
 
 
 class App(customtkinter.CTk):
     APP_NAME = "Gaz Grid Overview"
     WIDTH = 1400
-    HEIGHT = 900
+    HEIGHT = 950
 
     def __init__(self, base_gaz_network_path, base_population_path, simplified_gaz_network_path,
-                 exhaustive_gaz_network_path, *args, **kwargs):
+                 exhaustive_gaz_network_path, information_path, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title(App.APP_NAME)
         self.geometry(str(App.WIDTH) + "x" + str(App.HEIGHT))
@@ -36,14 +37,15 @@ class App(customtkinter.CTk):
         self.exhaustive_gaz_df = pd.read_csv(exhaustive_gaz_network_path)
         self.exhaustive_gaz_df['coordinates'] = self.exhaustive_gaz_df['coordinates'].apply(lambda x: eval(x))
 
+        self.information_df = pd.read_csv(information_path)
+        self.exhaustive_network_length, self.simplified_network_length = self.information_df.iloc[0]
+
         self.view_mode = "exhaustive"
         self.gaz_df = self.exhaustive_gaz_df
 
         self.loading_screen = None
         self.progress_var = None
         self.progress_bar = None
-
-        self.simplified_network_length = self.network_length = 36000
 
         self.extract_regions()
         self.setup_ui()
@@ -89,16 +91,17 @@ class App(customtkinter.CTk):
         self.frame_left.grid_columnconfigure(0, weight=1)
         self.frame_left.grid_columnconfigure(1, weight=1)
 
-        self.toggle_button = customtkinter.CTkButton(self.frame_left, text="Switch to Simplified View",
+        self.toggle_switch = customtkinter.CTkSwitch(self.frame_left, text="Simplified View", font=("Helvetica", 16, "bold"),
                                                      command=lambda: toggle_view_mode(self))
-        self.toggle_button.grid(row=0, column=0, columnspan=2, padx=(20, 20), pady=(20, 10))
+        self.toggle_switch.grid(row=0, column=0, columnspan=2, padx=(20, 20), pady=(20, 10))
 
         self.region_frame_gaz = customtkinter.CTkFrame(self.frame_left, fg_color=None)
         self.region_frame_gaz.grid(row=1, column=0, columnspan=2, padx=(20, 20), pady=(10, 20), sticky="n")
 
         self.region_label_gaz = customtkinter.CTkLabel(self.region_frame_gaz, text="Select regions",
                                                        font=("Helvetica", 16, "bold"))
-        self.region_label_gaz.grid(row=0, column=0, padx=(0, 0), pady=(0, 10), sticky="w")
+        self.region_label_gaz.grid(row=0, column=0, padx=(0, 0), pady=(0, 10), sticky="n")
+        self.region_frame_gaz.grid_columnconfigure(0, weight=1)
 
         self.region_checkboxes_gaz = {}
         for idx, (region, display_name) in enumerate(self.region_display_names_gaz.items()):
@@ -111,59 +114,64 @@ class App(customtkinter.CTk):
 
         self.buffer_distance_label = customtkinter.CTkLabel(self.param_frame, text="Buffer Distance:  ", anchor="w")
         self.buffer_distance_label.grid(row=0, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
-        self.buffer_distance_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2,
-                                                            border_color="green")
+        self.buffer_distance_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="green")
         self.buffer_distance_entry.grid(row=0, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
         self.buffer_distance_unit = customtkinter.CTkLabel(self.param_frame, text="meters", anchor="w")
         self.buffer_distance_unit.grid(row=0, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
 
         self.orange_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Orange Threshold:  ", anchor="w")
         self.orange_threshold_label.grid(row=1, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
-        self.orange_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2,
-                                                             border_color="orange")
+        self.orange_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="orange")
         self.orange_threshold_entry.grid(row=1, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
         self.orange_threshold_unit = customtkinter.CTkLabel(self.param_frame, text="hab/km²", anchor="w")
         self.orange_threshold_unit.grid(row=1, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
 
         self.red_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Red Threshold:  ", anchor="w")
         self.red_threshold_label.grid(row=2, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
-        self.red_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2,
-                                                          border_color="red")
+        self.red_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="red")
         self.red_threshold_entry.grid(row=2, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
         self.red_threshold_unit = customtkinter.CTkLabel(self.param_frame, text="hab/km²", anchor="w")
         self.red_threshold_unit.grid(row=2, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
 
-        self.recalculate_button = customtkinter.CTkButton(self.param_frame, text="Recalculate",
-                                                          command=lambda: self.start_recalculation())
-        self.recalculate_button.grid(row=3, column=0, columnspan=3, padx=(20, 20), pady=(10, 20))
+        self.merging_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Merging Threshold:  ", anchor="w")
+        self.merging_threshold_label.grid(row=3, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
+        self.merging_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="purple")
+        self.merging_threshold_entry.grid(row=3, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
+        self.merging_threshold_unit = customtkinter.CTkLabel(self.param_frame, text="meters", anchor="w")
+        self.merging_threshold_unit.grid(row=3, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
+
+        self.recalculate_button = customtkinter.CTkButton(self.param_frame, text="Recalculate", command=lambda: self.start_recalculation())
+        self.recalculate_button.grid(row=4, column=0, columnspan=3, padx=(20, 20), pady=(10, 20))
 
         self.network_info_frame = customtkinter.CTkFrame(self.frame_left, fg_color=None)
-        self.network_info_frame.grid(row=3, column=0, columnspan=2, padx=(20, 20), pady=(20, 10), sticky="ew")
+        self.network_info_frame.grid(row=4, column=0, columnspan=2, padx=(20, 20), pady=(20, 10), sticky="ew")
 
-        self.network_length_label = customtkinter.CTkLabel(self.network_info_frame,
-                                                           text=f"Network length: {self.network_length:.3f} km",
-                                                           font=("Helvetica", 14, "bold"))
-        self.network_length_label.grid(row=0, column=0, padx=(10, 10), pady=(5, 5), sticky="w")
 
+        self.exhaustive_network_text_label = customtkinter.CTkLabel(self.network_info_frame, text="Exhaustive network length :  ", font=("Helvetica", 14))
+        self.exhaustive_network_text_label.grid(row=0, column=0, padx=(10, 0), pady=(5, 5), sticky="e")
+        self.exhaustive_network_length_label = customtkinter.CTkLabel(self.network_info_frame,
+            text=f"{self.exhaustive_network_length / 1000:,.3f} km".replace(",", " "), font=("Helvetica", 14, "bold"))
+        self.exhaustive_network_length_label.grid(row=0, column=1, padx=(0, 10), pady=(5, 5), sticky="w")
+
+        self.simplified_network_text_label = customtkinter.CTkLabel(self.network_info_frame, text="Simplified network length :  ", font=("Helvetica", 14))
+        self.simplified_network_text_label.grid(row=1, column=0, padx=(10, 0), pady=(5, 5), sticky="e")
         self.simplified_network_length_label = customtkinter.CTkLabel(self.network_info_frame,
-                                                                      text=f"Simplified network length: {self.simplified_network_length:.3f} km",
-                                                                      font=("Helvetica", 14, "bold"))
-        self.simplified_network_length_label.grid(row=1, column=0, padx=(10, 10), pady=(5, 5), sticky="w")
+            text=f"{self.simplified_network_length / 1000:,.3f} km".replace(",", " "), font=("Helvetica", 14, "bold"))
+        self.simplified_network_length_label.grid(row=1, column=1, padx=(0, 10), pady=(5, 5), sticky="w")
+
 
         self.map_label = customtkinter.CTkLabel(self.frame_left, text="Background:", anchor="w")
         self.map_label.grid(row=5, column=0, padx=(20, 0), pady=(10, 10), sticky="sw")
         self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left,
-                                                           values=["OpenStreetMap", "Google Map (classic)",
-                                                                   "Google Map (satellite)"],
-                                                           command=lambda new_map: change_map(self, new_map))
+            values=["Open Street Map", "Google Map (classic)", "Google Map (satellite)"],
+            command=lambda new_map: change_map(self, new_map))
         self.map_option_menu.grid(row=5, column=1, padx=(0, 20), pady=(10, 10), sticky="sw")
 
         self.appearance_mode_label = customtkinter.CTkLabel(self.frame_left, text="Appearance:", anchor="w")
         self.appearance_mode_label.grid(row=6, column=0, padx=(20, 0), pady=(10, 20), sticky="sw")
         self.appearance_mode_option_menu = customtkinter.CTkOptionMenu(self.frame_left,
-                                                                       values=["Light", "Dark", "System"],
-                                                                       command=lambda mode: change_appearance_mode(self,
-                                                                                                                   mode))
+            values=["Light", "Dark", "System"],
+            command=lambda mode: change_appearance_mode(self, mode))
         self.appearance_mode_option_menu.grid(row=6, column=1, padx=(0, 20), pady=(10, 20), sticky="sw")
 
     def create_right_frame(self):
@@ -187,12 +195,13 @@ class App(customtkinter.CTk):
         # Set default values
         self.map_widget.set_position(47, 2.5, marker=False)
         self.map_widget.set_zoom(6)
-        self.map_option_menu.set("OpenStreetMap")
+        self.map_option_menu.set("Open Street Map")
         self.appearance_mode_option_menu.set("System")
 
-        self.buffer_distance_entry.insert(0, "200")
-        self.orange_threshold_entry.insert(0, "250")
-        self.red_threshold_entry.insert(0, "2500")
+        self.buffer_distance_entry.insert(0, BUFFER_DISTANCE)
+        self.orange_threshold_entry.insert(0, ORANGE_THRESHOLD)
+        self.red_threshold_entry.insert(0, RED_THRESHOLD)
+        self.merging_threshold_entry.insert(0, MERGING_THRESHOLD)
 
     def show_loading_screen(self):
         self.loading_screen = customtkinter.CTkToplevel(self)
@@ -206,7 +215,8 @@ class App(customtkinter.CTk):
         self.progress_bar = ttk.Progressbar(self.loading_screen, variable=self.progress_var, maximum=100)
         self.progress_bar.pack(pady=10)
 
-        self.center_window(self.loading_screen)
+        self.loading_screen.update_idletasks()
+        self.loading_screen.geometry(f"{300}x{100}+{self.loading_screen.winfo_screenwidth() // 2}+{self.loading_screen.winfo_screenheight() // 2}")
 
         self.loading_screen.transient(self)
         self.loading_screen.grab_set()
@@ -240,6 +250,4 @@ class App(customtkinter.CTk):
     def start(self):
         self.mainloop()
 
-    def center_window(self, window):
-        window.update_idletasks()
-        window.geometry(f"{300}x{100}+{window.winfo_screenwidth() // 2}+{window.winfo_screenheight() // 2}")
+

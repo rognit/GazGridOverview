@@ -2,11 +2,13 @@ import math
 import ast
 
 import pandas as pd
-from pyproj import CRS, Transformer
+from networkx import information_centrality
+from pyproj import CRS, Transformer, Geod
 from tqdm import tqdm
 
 from app.core_logic.path_maker import merge_all_segments
 from app.core_logic.segment_merger import simplify_segments
+from app.tools import calculate_length
 from config import *
 
 
@@ -14,13 +16,14 @@ def compute_parameters(gaz_df, pop_df,
                        buffer_distance=BUFFER_DISTANCE,
                        orange_threshold=ORANGE_THRESHOLD,
                        red_threshold=RED_THRESHOLD,
+                       merging_threshold=MERGING_THRESHOLD,
                        progress_callback=None,
                        show_tqdm=False):
     square_size = SQUARE_SIZE
     squared_buffer_distance = buffer_distance ** 2
 
-    crs3035 = CRS('EPSG:3035')
-    wgs84 = CRS('EPSG:4326')
+    crs3035 = CRS('EPSG:3035')  # CRS for Europe
+    wgs84 = CRS('EPSG:4326')  # CRS for GPS coordinates
     to_crs = Transformer.from_crs(wgs84, crs3035)
 
     def get_density(x, y):
@@ -163,7 +166,8 @@ def compute_parameters(gaz_df, pop_df,
         #                        (ast.literal_eval(segment) if isinstance(segment, str) else segment))
         ((y1, x1), (y2, x2)) = (to_crs.transform(*vertex) for vertex in segment)
 
-        segment_squares = (get_squares_from_vertex(x1, y1) | get_squares_from_edge(x1, y1, x2, y2) |
+        segment_squares = (get_squares_from_vertex(x1, y1) |
+                           get_squares_from_edge(x1, y1, x2, y2) |
                            get_squares_from_vertex(x2, y2))
 
         return get_color_from_squares(segment_squares)
@@ -184,6 +188,8 @@ def compute_parameters(gaz_df, pop_df,
                 print(f"Unexpected lengths: {lengths}")
                 return 'red'
 
+
+
     colored_gaz_df = gaz_df.copy()
 
     total_segments = len(colored_gaz_df)
@@ -196,27 +202,27 @@ def compute_parameters(gaz_df, pop_df,
         colored_gaz_df.at[row.Index, 'color'] = color
         progress_callback(int((idx / total_segments) * 100))
 
-    colored_gaz_df.to_csv("TEEEEST.csv")
-
     color_order = pd.CategoricalDtype(categories=['green', 'orange', 'red'], ordered=True)
     colored_gaz_df['color'] = colored_gaz_df['color'].astype(color_order)
-
-    colored_gaz_df.to_csv("TEEEEST1.csv")
 
     colored_gaz_df = colored_gaz_df.sort_values(by=['region', 'color'])  # Because we want to draw Green under Orange
     # under Red
 
-    colored_gaz_df.to_csv("TEEEEST2.csv")
-
     simplified_gaz_df = simplify_segments(colored_gaz_df, show_tqdm)
     simplified_gaz_df['color'] = simplified_gaz_df['lengths'].apply(choose_color)
+    simplified_gaz_df['length'] = simplified_gaz_df['coordinates'].apply(calculate_length)
+
+    exhaustive_network_length = colored_gaz_df['length'].sum()
+    simplified_network_length = simplified_gaz_df['length'].sum()
+
+    information_df = pd.DataFrame({'exhaustive_network_length': [exhaustive_network_length],
+                                   'simplified_network_length': [simplified_network_length]})
 
     simplified_gaz_df = merge_all_segments(simplified_gaz_df, show_tqdm,
                                            desc="Making paths for simplified segments region by region")
-
     exhaustive_gaz_df = merge_all_segments(colored_gaz_df, show_tqdm,
                                            desc="Making paths for exhaustive segments region by region")
 
     progress_callback(100)
 
-    return simplified_gaz_df, exhaustive_gaz_df
+    return simplified_gaz_df, exhaustive_gaz_df, information_df

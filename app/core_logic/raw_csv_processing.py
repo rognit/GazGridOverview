@@ -5,8 +5,7 @@ import pandas as pd
 from pyproj import Geod
 from tqdm import tqdm
 
-
-
+from app.tools import calculate_length
 
 
 def process_gaz(df_grt, df_terega):
@@ -29,7 +28,7 @@ def process_gaz(df_grt, df_terega):
         return df
 
     def terega_df_clean_up(df):
-        # delete row where geo_point_2d = 43.18000060207648, 0.008788065393684546
+        # delete row where geo_point_2d = "43.18000060207648, 0.008788065393684546"
         df = df[df['geo_point_2d'] != '43.18000060207648, 0.008788065393684546']
 
         df = df[['region', 'geo_shape']]
@@ -49,12 +48,6 @@ def process_gaz(df_grt, df_terega):
 
     def create_segments(coordinates):
         return [(coordinates[i], coordinates[i + 1]) for i in range(len(coordinates) - 1)]
-
-    geod = Geod(ellps='WGS84')
-
-    def calculate_length(coords):
-        (lat1, lon1), (lat2, lon2) = coords
-        return geod.inv(lon1, lat1, lon2, lat2)[2]  # 0: Forward Azimuth, 1: Back Azimuth, 2: Distance
 
     # Manual cleaning of csv errors
     df_grt = grt_df_clean_up(df_grt)
@@ -95,4 +88,3 @@ def process_pop(df):
     df.drop(columns=['idcar_200m', 'ind'], inplace=True)
 
     return df
-

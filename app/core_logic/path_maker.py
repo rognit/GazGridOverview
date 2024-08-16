@@ -5,10 +5,6 @@ from tqdm import tqdm
 
 
 def merge_region_color_segments(df):
-    def parse_segment(segment):
-        #return ast.literal_eval(segment.strip()) if isinstance(segment, str) else segment
-        return segment.strip()
-
     def comon_point(seg0, group):
         for seg in group:
             if seg0[0] in seg or seg0[1] in seg:

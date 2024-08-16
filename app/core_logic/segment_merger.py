@@ -6,14 +6,9 @@ import pandas as pd
 from pyproj import Geod
 from tqdm import tqdm
 
+from app.tools import calculate_length
 # Assuming MAX_MERGING_THRESHOLD and MERGING_THRESHOLD are defined in config
 from config import *
-
-geod = Geod(ellps='WGS84')
-
-
-def calculate_length(lat1, lon1, lat2, lon2):
-    return geod.inv(lon1, lat1, lon2, lat2)[2]  # 0: Forward Azimuth, 1: Back Azimuth, 2: Distance
 
 
 def calculate_centroid(points):
@@ -28,10 +23,6 @@ def make_clusters(df, show_tqdm):
     tree = cKDTree(coordinates)
     # Approximate conversion from meters to degrees (1 degree ≈ 111km at the equator)
     approx_distance_deg = MAX_MERGING_THRESHOLD / 111000
-
-    def calculate_length(coords):
-        (lat1, lon1), (lat2, lon2) = coords
-        return geod.inv(lon1, lat1, lon2, lat2)[2]  # 0: Forward Azimuth, 1: Back Azimuth, 2: Distance
 
     def find_nearby_points(point):
         potential_neighbors = tree.query_ball_point(point, r=approx_distance_deg)
@@ -84,9 +75,6 @@ def simplify_segments(colored_gaz_df, show_tqdm):
 
     centroid_df.to_csv("centroid.csv")
     centroid_df.index = centroid_df.index.map(lambda x: tuple(map(float, x)))
-
-    #computed_gaz_df = pd.DataFrame(columns=['region', 'coordinates', 'lengths'])
-    #same_centroid = []
 
     iterator = tqdm(colored_gaz_df.itertuples(index=False), desc="Simplifying Segments", total=len(colored_gaz_df)) \
         if show_tqdm else colored_gaz_df.itertuples(index=False)
