@@ -12,7 +12,7 @@ from config import *
 def simplify_segments(colored_gaz_df, merging_threshold, show_tqdm):
 
     def calculate_centroid(points):
-        return np.mean([p[0] for p in points]), np.mean([p[1] for p in points])
+        return sum(p[0] for p in points) / len(points), sum(p[1] for p in points) / len(points)
 
     def make_clusters(df):
         coordinates = list(set([point for segment in df['coordinates'].tolist() for point in segment]))

@@ -2,7 +2,6 @@ import pandas as pd
 from tqdm import tqdm
 
 
-
 def make_paths(df, show_tqdm, desc):
     def merge_region_color_segments(df):
         def comon_point(seg0, group):

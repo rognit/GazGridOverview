@@ -4,7 +4,7 @@ import pandas as pd
 
 from config import *
 from app.core_logic.calculator import compute_parameters
-from app.core_logic.csv_pre_processing import process_gaz, process_pop
+from app.raw_csv_processing import process_gaz, process_pop
 
 
 def main():
@@ -44,6 +44,8 @@ def main():
         'ind_80p': float,
         'ind_inc': float
     }
+
+    print("Processing raw data...", flush=True)
 
     raw_df_pop = pd.read_csv(os.path.normpath(INIT_POPULATION_PATH), dtype=dtype_pop_dict)[['idcar_200m', 'ind']].copy()
     raw_df_grt = pd.read_csv(os.path.normpath(INIT_GRT_PATH), delimiter=';')

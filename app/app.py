@@ -3,7 +3,7 @@ import pandas as pd
 
 from threading import Thread
 from tkintermapview import TkinterMapView
-from tkinter import ttk, PhotoImage
+from tkinter import ttk
 
 from app.callbacks import change_region, change_map, change_appearance_mode, search_event, recalculate_segments, toggle_view_mode
 from config import *

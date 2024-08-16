@@ -22,6 +22,7 @@ def compute_parameters(gaz_df, pop_df,
 
     simplified_gaz_df = simplify_segments(exhaustive_gaz_df, merging_threshold, show_tqdm)
 
+    progress_callback(85)
 
     # We want to highlight the issues above. So green will be drawn under yellow, then yellow under orange, etc.
     color_order = pd.CategoricalDtype(categories=['green', 'yellow', 'orange', 'brown', 'red'], ordered=True)
@@ -33,9 +34,10 @@ def compute_parameters(gaz_df, pop_df,
     simplified_network_length = simplified_gaz_df['length'].sum()
     information_df = pd.DataFrame({'exhaustive_network_length': [exhaustive_network_length],
                                    'simplified_network_length': [simplified_network_length]})
-
+    progress_callback(90)
     exhaustive_gaz_df = make_paths(exhaustive_gaz_df, show_tqdm,
                                    desc="Making paths for exhaustive segments region by region")
+    progress_callback(95)
     simplified_gaz_df = make_paths(simplified_gaz_df, show_tqdm,
                                    desc="Making paths for simplified segments region by region")
 

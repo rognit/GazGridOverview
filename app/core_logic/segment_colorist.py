@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from config import *
 
+
 def color_segments(gaz_df, pop_df, buffer_distance, orange_threshold, red_threshold, progress_callback, show_tqdm):
 
     squared_buffer_distance = buffer_distance ** 2
@@ -156,7 +157,7 @@ def color_segments(gaz_df, pop_df, buffer_distance, orange_threshold, red_thresh
 
         return get_color_from_squares(segment_squares)
 
-
+    progress_callback(0)
     colored_gaz_df = gaz_df.copy()
 
     total_segments = len(colored_gaz_df)
@@ -167,6 +168,7 @@ def color_segments(gaz_df, pop_df, buffer_distance, orange_threshold, red_thresh
     for idx, row in iterator:
         color = get_color_from_segment(row.coordinates)
         colored_gaz_df.at[row.Index, 'color'] = color
-        progress_callback(int((idx / total_segments) * 100))
+        if idx % 100 == 0:
+            progress_callback(int((idx / total_segments) * 80))
 
     return colored_gaz_df
