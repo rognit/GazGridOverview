@@ -22,6 +22,8 @@ BASE_GAZ_NETWORK_PATH = 'resources/base_gaz_network.csv'
 SIMPLIFIED_COMPUTED_GAZ_NETWORK_PATH = 'resources/simplified_computed_gaz_network.csv'
 EXHAUSTIVE_COMPUTED_GAZ_NETWORK_PATH = 'resources/exhaustive_computed_gaz_network.csv'
 INFORMATION_PATH = 'resources/information.csv'
+GREEN_MARKERS_PATH = 'resources/green_markers.csv'
+ORANGE_MARKERS_PATH = 'resources/orange_markers.csv'
 
 # other resources
 ICON_PATH = 'resources/icon.ico'

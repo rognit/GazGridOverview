@@ -58,12 +58,14 @@ def main():
     df_pop.to_csv(os.path.normpath(BASE_POPULATION_PATH))
 
     print("Initial computing with preset parameters...")
-    simplified_computed_df, exhaustive_computed_df, information_df = \
+    simplified_computed_df, exhaustive_computed_df, information_df, green_markers_df, orange_markers_df = \
         compute_parameters(df_gaz, df_pop, progress_callback=lambda x: None, show_tqdm=True)
 
     simplified_computed_df.to_csv(os.path.normpath(SIMPLIFIED_COMPUTED_GAZ_NETWORK_PATH), index=False)
     exhaustive_computed_df.to_csv(os.path.normpath(EXHAUSTIVE_COMPUTED_GAZ_NETWORK_PATH), index=False)
     information_df.to_csv(os.path.normpath(INFORMATION_PATH), index=False)
+    green_markers_df.to_csv(os.path.normpath(GREEN_MARKERS_PATH), index=False)
+    orange_markers_df.to_csv(os.path.normpath(ORANGE_MARKERS_PATH), index=False)
 
     print("\n\nSetup completed successfully!\n\n")
 

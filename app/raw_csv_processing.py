@@ -5,6 +5,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from app.tools import calculate_length
+from config import SQUARE_SIZE
 
 
 def process_gaz(df_grt, df_terega):
@@ -81,8 +82,10 @@ def process_pop(df):
     tqdm.pandas(desc="Indexing")
     df.set_index(['north', 'east'], inplace=True)
 
+    factor = round(1e6 / (SQUARE_SIZE**2))
+
     tqdm.pandas(desc="Calculating density")
-    df['density'] = df['ind'].progress_apply(lambda x: 25 * x)
+    df['density'] = df['ind'].progress_apply(lambda x: factor * x)
 
     df.drop(columns=['idcar_200m', 'ind'], inplace=True)
 

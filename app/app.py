@@ -15,8 +15,8 @@ class App(customtkinter.CTk):
     HEIGHT = 950
 
     def __init__(self, base_gaz_network_path, base_population_path, simplified_gaz_network_path,
-                 exhaustive_gaz_network_path, information_path, icon_path, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+                 exhaustive_gaz_network_path, information_path, green_marker_path, orange_marker_path, icon_path):
+        super().__init__()
         self.title(App.APP_NAME)
         self.geometry(str(App.WIDTH) + "x" + str(App.HEIGHT))
         self.minsize(App.WIDTH, self.HEIGHT)
@@ -40,6 +40,12 @@ class App(customtkinter.CTk):
 
         self.information_df = pd.read_csv(information_path)
         self.exhaustive_network_length, self.simplified_network_length = self.information_df.iloc[0]
+
+        self.green_marker_df = pd.read_csv(green_marker_path)
+        self.green_marker_df['coordinates'] = self.green_marker_df['coordinates'].apply(lambda x: eval(x))
+
+        self.orange_marker_df = pd.read_csv(orange_marker_path)
+        self.orange_marker_df['coordinates'] = self.orange_marker_df['coordinates'].apply(lambda x: eval(x))
 
         self.view_mode = "exhaustive"
         self.gaz_df = self.exhaustive_gaz_df

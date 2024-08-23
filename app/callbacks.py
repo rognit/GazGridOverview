@@ -44,15 +44,16 @@ def toggle_view_mode(self):
 
 def recalculate_segments(app):
 
-    app.simplified_gaz_df, app.exhaustive_gaz_df, app.information_df = compute_parameters(
-        app.base_gaz_network_path,
-        app.pop_df,
-        buffer_distance= int(app.buffer_distance_entry.get()),
-        orange_threshold= int(app.orange_threshold_entry.get()),
-        red_threshold=int(app.red_threshold_entry.get()),
-        merging_threshold=int(app.merging_threshold_entry.get()),
-        progress_callback=app.update_progress
-    )
+    app.simplified_gaz_df, app.exhaustive_gaz_df, app.information_df, app.green_marker_df, app.orange_marker_df = \
+        compute_parameters(
+            app.base_gaz_network_path,
+            app.pop_df,
+            buffer_distance= int(app.buffer_distance_entry.get()),
+            orange_threshold= int(app.orange_threshold_entry.get()),
+            red_threshold=int(app.red_threshold_entry.get()),
+            merging_threshold=int(app.merging_threshold_entry.get()),
+            progress_callback=app.update_progress
+        )
 
     app.exhaustive_network_length, app.simplified_network_length = app.information_df.iloc[0]
     app.gaz_df = app.exhaustive_gaz_df if app.view_mode == "exhaustive" else app.simplified_gaz_df

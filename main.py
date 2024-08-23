@@ -19,6 +19,8 @@ if __name__ == "__main__":
         resource_path(SIMPLIFIED_COMPUTED_GAZ_NETWORK_PATH),
         resource_path(EXHAUSTIVE_COMPUTED_GAZ_NETWORK_PATH),
         resource_path(INFORMATION_PATH),
+        resource_path(GREEN_MARKERS_PATH),
+        resource_path(ORANGE_MARKERS_PATH),
         resource_path(ICON_PATH)
     )
     app.start()
