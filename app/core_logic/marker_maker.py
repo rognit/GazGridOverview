@@ -8,19 +8,18 @@ def make_markers(df):
     def create_graph(df):
         graph = nx.Graph()
         for _, row in df.iterrows():
-            start, end = eval(row['coordinates'])
+            start, end = row['coordinates']
             graph.add_edge(start, end, **row.to_dict())
         return graph
 
     def is_green_only(graph, u, v):
         edge_data = graph.get_edge_data(u, v)
-        lengths = eval(edge_data['lengths'])
+        lengths = edge_data['lengths']
         return lengths['red'] == lengths['orange'] == 0
 
     def is_green_orange(graph, u, v):
         edge_data = graph.get_edge_data(u, v)
-        lengths = eval(edge_data['lengths'])
-        return lengths['red'] == 0
+        return edge_data['lengths']['red'] == 0
 
     def get_connected_subsets(graph, condition_func):
         subset_graph = nx.Graph()
@@ -35,7 +34,7 @@ def make_markers(df):
             for neighbor in graph.neighbors(node):
                 if neighbor in subset:
                     edge_data = graph.get_edge_data(node, neighbor)
-                    start, end = eval(edge_data['coordinates'])
+                    start, end = edge_data['coordinates']
                     coordinates.extend([start, end])
         mean_coordinates = np.mean(coordinates, axis=0)
         return tuple(float(coord) for coord in mean_coordinates)
@@ -46,7 +45,7 @@ def make_markers(df):
             for neighbor in graph.neighbors(node):
                 if neighbor in subset:
                     edge_data = graph.get_edge_data(node, neighbor)
-                    lengths = eval(edge_data['lengths'])
+                    lengths = edge_data['lengths']
                     green_total += lengths['green']
                     orange_total += lengths['orange']
         return green_total, orange_total
@@ -57,7 +56,7 @@ def make_markers(df):
             center = calculate_subset_center(graph, subset)
             green_quantity, orange_quantity = calculate_subset_quantities(graph, subset)
             data.append({
-                'center': center,
+                'coordinates': center,
                 'green_quantity': green_quantity,
                 'orange_quantity': orange_quantity
             })

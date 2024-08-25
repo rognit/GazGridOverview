@@ -181,6 +181,14 @@ class App(customtkinter.CTk):
             command=lambda mode: change_appearance_mode(self, mode))
         self.appearance_mode_option_menu.grid(row=6, column=1, padx=(0, 20), pady=(10, 20), sticky="sw")
 
+        self.buffer_distance_entry.insert(0, BUFFER_DISTANCE)
+        self.orange_threshold_entry.insert(0, ORANGE_THRESHOLD)
+        self.red_threshold_entry.insert(0, RED_THRESHOLD)
+        self.merging_threshold_entry.insert(0, MERGING_THRESHOLD)
+
+
+
+
     def create_right_frame(self):
         self.frame_right.grid_rowconfigure(1, weight=1)
         self.frame_right.grid_rowconfigure(0, weight=0)
@@ -199,16 +207,15 @@ class App(customtkinter.CTk):
                                                 command=lambda: search_event(self))
         self.button_5.grid(row=0, column=1, sticky="w", padx=(12, 0), pady=12)
 
+
+
         # Set default values
         self.map_widget.set_position(47, 2.5, marker=False)
         self.map_widget.set_zoom(6)
         self.map_option_menu.set("Open Street Map")
         self.appearance_mode_option_menu.set("System")
 
-        self.buffer_distance_entry.insert(0, BUFFER_DISTANCE)
-        self.orange_threshold_entry.insert(0, ORANGE_THRESHOLD)
-        self.red_threshold_entry.insert(0, RED_THRESHOLD)
-        self.merging_threshold_entry.insert(0, MERGING_THRESHOLD)
+
 
     def show_loading_screen(self):
         self.loading_screen = customtkinter.CTkToplevel(self)

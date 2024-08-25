@@ -32,7 +32,7 @@ def compute_parameters(gaz_df, pop_df,
     exhaustive_gaz_df = exhaustive_gaz_df.sort_values(by=['region', 'color'])
     simplified_gaz_df = simplified_gaz_df.sort_values(by=['region', 'color'])
 
-    green_markers_df, orange_markers_df = make_markers(exhaustive_gaz_df)
+    green_markers_df, orange_markers_df = make_markers(simplified_gaz_df)
 
     exhaustive_network_length = exhaustive_gaz_df['length'].sum()
     simplified_network_length = simplified_gaz_df['length'].sum()
