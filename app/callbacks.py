@@ -1,6 +1,7 @@
 import customtkinter
 
 from app.core_logic.calculator import compute_parameters
+from config import MIN_SHOWING_MARKER_THRESHOLD
 
 
 def search_event(app, event=None):
@@ -9,10 +10,21 @@ def search_event(app, event=None):
 
 def change_region(app):
     app.map_widget.delete_all_path()
+    app.map_widget.delete_all_marker()
     for region, checkbox in app.region_checkboxes_gaz.items():
         if checkbox.get():
-            for index, row in app.region_dfs_gaz[region].iterrows():
+            for _, row in app.region_dfs_gaz[region].iterrows():
                 app.map_widget.set_path(row['coordinates'], color=row['color'])
+            if app.markers_toggle_switch.get() == 1:
+                for _, row in app.green_marker_df.iterrows():
+                    if row['green_quantity'] > MIN_SHOWING_MARKER_THRESHOLD and row['region'] == region:
+                        app.map_widget.set_marker(*row['coordinates'], text=f"{row['green_quantity'] / 1e3:.3f} km",
+                                                   marker_color_circle="#3ef50a", marker_color_outside="#1d8001")
+                for _, row in app.orange_marker_df.iterrows():
+                    quantity = row['orange_quantity'] + row['green_quantity']
+                    if quantity > MIN_SHOWING_MARKER_THRESHOLD and row['region'] == region:
+                        app.map_widget.set_marker(*row['coordinates'], text=f"{quantity / 1e3:.3f} km",
+                                                   marker_color_circle="#f5a623", marker_color_outside="#b86b00")
 
 
 def change_map(app, new_map):
@@ -28,19 +40,24 @@ def change_appearance_mode(app, new_appearance_mode):
     customtkinter.set_appearance_mode(new_appearance_mode)
 
 
-def toggle_view_mode(self):
-    if self.toggle_switch.get() == 0:  # Switch is off (Exhaustive view)
-        self.view_mode = "exhaustive"
-        self.gaz_df = self.exhaustive_gaz_df
-        self.toggle_switch.configure(text="Exhaustive View")
+def toggle_view_mode(app):
+    if app.view_mode_toggle_switch.get() == 0:  # Switch is off (Exhaustive view)
+        app.view_mode = "exhaustive"
+        app.gaz_df = app.exhaustive_gaz_df
+        app.view_mode_toggle_switch.configure(text="Exhaustive View")
     else:  # Switch is on (Simplified view)
-        self.view_mode = "simplified"
-        self.gaz_df = self.simplified_gaz_df
-        self.toggle_switch.configure(text="Simplified View")
+        app.view_mode = "simplified"
+        app.gaz_df = app.simplified_gaz_df
+        app.view_mode_toggle_switch.configure(text="Simplified View")
 
-    self.extract_regions()
-    change_region(self)
+    app.extract_regions()
+    change_region(app)
 
+def toggle_markers(app):
+    if app.markers_toggle_switch.get() == 0:  # Switch is off (Hide markers)
+        app.map_widget.delete_all_marker()
+    else:  # Switch is on (Show markers)
+        change_region(app)
 
 def recalculate_segments(app):
 

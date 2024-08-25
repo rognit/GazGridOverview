@@ -5,14 +5,15 @@ from threading import Thread
 from tkintermapview import TkinterMapView
 from tkinter import ttk
 
-from app.callbacks import change_region, change_map, change_appearance_mode, search_event, recalculate_segments, toggle_view_mode
+from app.callbacks import change_region, change_map, change_appearance_mode, search_event, recalculate_segments, \
+    toggle_view_mode, toggle_markers
 from config import *
 
 
 class App(customtkinter.CTk):
     APP_NAME = "Gaz Grid Overview"
     WIDTH = 1400
-    HEIGHT = 950
+    HEIGHT = 1000
 
     def __init__(self, base_gaz_network_path, base_population_path, simplified_gaz_network_path,
                  exhaustive_gaz_network_path, information_path, green_marker_path, orange_marker_path, icon_path):
@@ -76,6 +77,12 @@ class App(customtkinter.CTk):
         self.region_dfs_gaz = {
             region: self.gaz_df[self.gaz_df['region'] == region] for region in regions
         }
+        self.region_dfs_green_marker = {
+            region: self.green_marker_df[self.green_marker_df['region'] == region] for region in regions
+        }
+        self.region_dfs_orange_marker = {
+            region: self.orange_marker_df[self.orange_marker_df['region'] == region] for region in regions
+        }
 
         region_counts = {region: len(self.region_dfs_gaz[region]) for region in regions}
         self.region_display_names_gaz = {region: f"{region} ({count})" for region, count in region_counts.items()}
@@ -87,7 +94,7 @@ class App(customtkinter.CTk):
                     self.region_checkboxes_gaz[region].configure(text=display_name)
 
     def create_left_frame(self):
-        self.frame_left.grid_rowconfigure(0, weight=0)  # Toggle button
+        self.frame_left.grid_rowconfigure(0, weight=0)  # Toggle buttons frame
         self.frame_left.grid_rowconfigure(1, weight=0)  # Region checkboxes frame
         self.frame_left.grid_rowconfigure(2, weight=0)  # Parameters frame
         self.frame_left.grid_rowconfigure(3, weight=0)  # Network info frame
@@ -96,14 +103,24 @@ class App(customtkinter.CTk):
         self.frame_left.grid_rowconfigure(6, weight=0)  # Appearance
 
         self.frame_left.grid_columnconfigure(0, weight=1)
-        self.frame_left.grid_columnconfigure(1, weight=1)
 
-        self.toggle_switch = customtkinter.CTkSwitch(self.frame_left, text="Simplified View", font=("Helvetica", 16, "bold"),
-                                                     command=lambda: toggle_view_mode(self))
-        self.toggle_switch.grid(row=0, column=0, columnspan=2, padx=(20, 20), pady=(20, 10))
+        # Toggle buttons frame
+        self.toggle_frame = customtkinter.CTkFrame(self.frame_left, fg_color=None)
+        self.toggle_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 10), sticky="ew")
 
+        self.markers_toggle_switch = customtkinter.CTkSwitch(self.toggle_frame, text="Markers",
+                                                             font=("Helvetica", 16, "bold"),
+                                                             command=lambda: toggle_markers(self))
+        self.markers_toggle_switch.grid(row=0, column=0, padx=(0, 10), pady=(0, 0), sticky="w")
+
+        self.view_mode_toggle_switch = customtkinter.CTkSwitch(self.toggle_frame, text="Simplified View",
+                                                               font=("Helvetica", 16, "bold"),
+                                                               command=lambda: toggle_view_mode(self))
+        self.view_mode_toggle_switch.grid(row=0, column=1, padx=(10, 0), pady=(0, 0), sticky="w")
+
+        # Region frame
         self.region_frame_gaz = customtkinter.CTkFrame(self.frame_left, fg_color=None)
-        self.region_frame_gaz.grid(row=1, column=0, columnspan=2, padx=(20, 20), pady=(10, 20), sticky="n")
+        self.region_frame_gaz.grid(row=1, column=0, padx=(20, 20), pady=(10, 20), sticky="nsew")
 
         self.region_label_gaz = customtkinter.CTkLabel(self.region_frame_gaz, text="Select regions",
                                                        font=("Helvetica", 16, "bold"))
@@ -116,8 +133,9 @@ class App(customtkinter.CTk):
                                                                            command=lambda: change_region(self))
             self.region_checkboxes_gaz[region].grid(row=idx + 1, column=0, padx=(0, 0), pady=(5, 0), sticky="w")
 
+        # Parameters frame
         self.param_frame = customtkinter.CTkFrame(self.frame_left, fg_color=None)
-        self.param_frame.grid(row=2, column=0, columnspan=2, padx=(20, 20), pady=(10, 20), sticky="n")
+        self.param_frame.grid(row=2, column=0, padx=(20, 20), pady=(10, 20), sticky="nsew")
 
         self.buffer_distance_label = customtkinter.CTkLabel(self.param_frame, text="Buffer Distance:  ", anchor="w")
         self.buffer_distance_label.grid(row=0, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
@@ -150,9 +168,9 @@ class App(customtkinter.CTk):
         self.recalculate_button = customtkinter.CTkButton(self.param_frame, text="Recalculate", command=lambda: self.start_recalculation())
         self.recalculate_button.grid(row=4, column=0, columnspan=3, padx=(20, 20), pady=(10, 20))
 
+        # Network info frame
         self.network_info_frame = customtkinter.CTkFrame(self.frame_left, fg_color=None)
         self.network_info_frame.grid(row=4, column=0, columnspan=2, padx=(20, 20), pady=(20, 10), sticky="ew")
-
 
         self.exhaustive_network_text_label = customtkinter.CTkLabel(self.network_info_frame, text="Exhaustive network length :  ", font=("Helvetica", 14))
         self.exhaustive_network_text_label.grid(row=0, column=0, padx=(10, 0), pady=(5, 5), sticky="e")
@@ -166,27 +184,28 @@ class App(customtkinter.CTk):
             text=f"{self.simplified_network_length / 1000:,.3f} km".replace(",", " "), font=("Helvetica", 14, "bold"))
         self.simplified_network_length_label.grid(row=1, column=1, padx=(0, 10), pady=(5, 5), sticky="w")
 
-
+        # Background and appearance options
         self.map_label = customtkinter.CTkLabel(self.frame_left, text="Background:", anchor="w")
-        self.map_label.grid(row=5, column=0, padx=(20, 0), pady=(10, 10), sticky="sw")
+        self.map_label.grid(row=5, column=0, padx=(20, 20), pady=(10, 10), sticky="sw")
         self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left,
-            values=["Open Street Map", "Google Map (classic)", "Google Map (satellite)"],
-            command=lambda new_map: change_map(self, new_map))
-        self.map_option_menu.grid(row=5, column=1, padx=(0, 20), pady=(10, 10), sticky="sw")
+                                                           values=["Open Street Map", "Google Map (classic)",
+                                                                   "Google Map (satellite)"],
+                                                           command=lambda new_map: change_map(self, new_map))
+        self.map_option_menu.grid(row=5, column=0, padx=(20, 20), pady=(10, 10), sticky="se")
 
         self.appearance_mode_label = customtkinter.CTkLabel(self.frame_left, text="Appearance:", anchor="w")
-        self.appearance_mode_label.grid(row=6, column=0, padx=(20, 0), pady=(10, 20), sticky="sw")
+        self.appearance_mode_label.grid(row=6, column=0, padx=(20, 20), pady=(10, 20), sticky="sw")
         self.appearance_mode_option_menu = customtkinter.CTkOptionMenu(self.frame_left,
-            values=["Light", "Dark", "System"],
-            command=lambda mode: change_appearance_mode(self, mode))
-        self.appearance_mode_option_menu.grid(row=6, column=1, padx=(0, 20), pady=(10, 20), sticky="sw")
+                                                                       values=["Light", "Dark", "System"],
+                                                                       command=lambda mode: change_appearance_mode(self,
+                                                                                                                   mode))
+        self.appearance_mode_option_menu.grid(row=6, column=0, padx=(20, 20), pady=(10, 20), sticky="se")
 
+        # Set initial values for entries
         self.buffer_distance_entry.insert(0, BUFFER_DISTANCE)
         self.orange_threshold_entry.insert(0, ORANGE_THRESHOLD)
         self.red_threshold_entry.insert(0, RED_THRESHOLD)
         self.merging_threshold_entry.insert(0, MERGING_THRESHOLD)
-
-
 
 
     def create_right_frame(self):
@@ -199,6 +218,7 @@ class App(customtkinter.CTk):
         self.map_widget = TkinterMapView(self.frame_right, corner_radius=0)
         self.map_widget.grid(row=1, rowspan=1, column=0, columnspan=3, sticky="nswe", padx=(0, 0), pady=(0, 0))
 
+
         self.entry = customtkinter.CTkEntry(master=self.frame_right, placeholder_text="type address")
         self.entry.grid(row=0, column=0, sticky="we", padx=(12, 0), pady=12)
         self.entry.bind("<Return>", lambda event: search_event(self, event))
@@ -206,8 +226,6 @@ class App(customtkinter.CTk):
         self.button_5 = customtkinter.CTkButton(master=self.frame_right, text="Search", width=90,
                                                 command=lambda: search_event(self))
         self.button_5.grid(row=0, column=1, sticky="w", padx=(12, 0), pady=12)
-
-
 
         # Set default values
         self.map_widget.set_position(47, 2.5, marker=False)

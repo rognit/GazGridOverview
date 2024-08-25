@@ -48,27 +48,28 @@ def make_markers(df):
                     lengths = edge_data['lengths']
                     green_total += lengths['green']
                     orange_total += lengths['orange']
-        return green_total, orange_total
+                    region = edge_data['region']
+        return green_total, orange_total, region
 
     def create_subset_dataframe(graph, subsets):
         data = []
         for subset in subsets:
-            center = calculate_subset_center(graph, subset)
-            green_quantity, orange_quantity = calculate_subset_quantities(graph, subset)
+            green_quantity, orange_quantity, region = calculate_subset_quantities(graph, subset)
             data.append({
-                'coordinates': center,
+                'region': region,
+                'coordinates': calculate_subset_center(graph, subset),
                 'green_quantity': green_quantity,
-                'orange_quantity': orange_quantity
+                'orange_quantity': orange_quantity,
             })
         return pd.DataFrame(data)
 
-    graph = create_graph(df)
+    network_graph = create_graph(df)
 
-    green_only_subsets = get_connected_subsets(graph, is_green_only)
-    green_orange_subsets = get_connected_subsets(graph, is_green_orange)
+    green_only_subsets = get_connected_subsets(network_graph, is_green_only)
+    green_orange_subsets = get_connected_subsets(network_graph, is_green_orange)
 
-    green_only_df = create_subset_dataframe(graph, green_only_subsets)
-    green_orange_df = create_subset_dataframe(graph, green_orange_subsets)
+    green_only_df = create_subset_dataframe(network_graph, green_only_subsets)
+    green_orange_df = create_subset_dataframe(network_graph, green_orange_subsets)
 
     green_only_df.to_csv("green_only_subsets.csv", index=False)
     green_orange_df.to_csv("green_orange_subsets.csv", index=False)
