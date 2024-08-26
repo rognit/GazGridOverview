@@ -7,7 +7,7 @@ MERGING_THRESHOLD = 50  # meters
 # other parameters
 SQUARE_SIZE = 200  # meters
 MAX_MERGING_THRESHOLD = 1000  # meters
-MIN_SHOWING_MARKER_THRESHOLD = 3e5  # meters
+MIN_SHOWING_MARKER_THRESHOLD = 5000  # meters
 IGNORING_THRESHOLD = 600  # meters
 
 # initial raw data (before setup)

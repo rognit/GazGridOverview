@@ -21,6 +21,8 @@ def compute_parameters(gaz_df, pop_df,
 
     exhaustive_gaz_df = color_segments(gaz_df, pop_df, buffer_distance, orange_threshold, red_threshold, progress_callback,show_tqdm)
 
+    progress_callback(80)
+
     simplified_gaz_df = simplify_segments(exhaustive_gaz_df, merging_threshold, show_tqdm)
 
     progress_callback(85)
