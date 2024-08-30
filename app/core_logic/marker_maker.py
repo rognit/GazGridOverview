@@ -1,13 +1,12 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+from scipy.spatial.distance import euclidean
 
 
 def make_markers(df):
-    def check_total_length(df):
-        total_length = sum([sum(lengths_str.values()) for lengths_str in df['lengths']])
-        print(f"Initial total length: {total_length}")
-        return total_length
+    def length_graph(graph):
+        return sum([sum(data['lengths'].values()) for _, _, data in graph.edges(data=True)])
 
     def create_graph(df):
         graph = nx.Graph()
@@ -16,21 +15,32 @@ def make_markers(df):
             graph.add_edge(start, end, **row.to_dict())
         return graph
 
-    def is_green_only(graph, u, v):
-        edge_data = graph.get_edge_data(u, v)
-        lengths = edge_data['lengths']
-        return lengths['red'] == lengths['orange'] == 0
+    def is_green_only(edge_data):
+        return edge_data['lengths']['red'] == edge_data['lengths']['orange'] == 0
 
-    def is_green_orange(graph, u, v):
-        edge_data = graph.get_edge_data(u, v)
+    def is_green_orange(edge_data):
         return edge_data['lengths']['red'] == 0
 
     def get_connected_subsets(graph, condition_func):
         subset_graph = nx.Graph()
+        total_length = 0
         for u, v, data in graph.edges(data=True):
-            if condition_func(graph, u, v):
+            #print([u, v, data])
+            if condition_func(graph.get_edge_data(u, v)):
                 subset_graph.add_edge(u, v, **data)
-        return list(nx.connected_components(subset_graph))
+                total_length += sum(data['lengths'].values())
+        print(f"Total length in subset graph: {total_length}")
+        #out = list(nx.connected_components(subset_graph))
+
+        connected_components = list(nx.connected_components(subset_graph))
+        subsets_with_edges = []
+
+        for component in connected_components:
+            subgraph = subset_graph.subgraph(component)
+            subset_edges = list(subgraph.edges(data=True))
+            subsets_with_edges.append((component, subset_edges))
+
+        return subsets_with_edges
 
     def calculate_subset_center(graph, subset):
         coordinates = []
@@ -55,42 +65,56 @@ def make_markers(df):
                     region = edge_data['region']
         return green_total, orange_total, region
 
-    def create_subset_dataframe(graph, subsets):
+    def create_subset_dataframe(graph, subsets_with_edges):
         data = []
         total_green = 0
         total_orange = 0
-        for subset in subsets:
-            green_quantity, orange_quantity, region = calculate_subset_quantities(graph, subset)
+        for subset_nodes, subset_edges in subsets_with_edges:
+            green_quantity = orange_quantity = 0
+            coordinates = []
+            points_with_regions = []
+
+            for _, _, edge_data in subset_edges:
+                lengths = edge_data['lengths']
+                green_quantity += lengths['green']
+                orange_quantity += lengths['orange']
+                start, end = edge_data['coordinates']
+                coordinates.extend([start, end])
+                points_with_regions.extend([(start, edge_data['region']), (end, edge_data['region'])])
+
             total_green += green_quantity
             total_orange += orange_quantity
+
+            center = tuple(float(coord) for coord in np.mean(coordinates, axis=0))
+
+            # Find the nearest point to determine the region
+            nearest_point = min(points_with_regions, key=lambda x: euclidean(center, x[0]))
+            region = nearest_point[1]
+
             data.append({
                 'region': region,
-                'coordinates': calculate_subset_center(graph, subset),
+                'coordinates': center,
                 'green_quantity': green_quantity,
                 'orange_quantity': orange_quantity,
+                'edges': subset_edges  # Store the edges for each subset
             })
+
         print(f"Total green: {total_green}, Total orange: {total_orange}")
         return pd.DataFrame(data)
 
-    initial_total = check_total_length(df)
+
+    initial_total = sum([sum(lengths_str.values()) for lengths_str in df['lengths']])
+    print(f"Initial total length: {initial_total}")
     network_graph = create_graph(df)
 
-    print("After create_graph:")
-    graph_total = sum([sum(data['lengths'].values()) for _, _, data in network_graph.edges(data=True)])
-    print(f"Total length in graph: {graph_total}")
+    print(f"Total length in graph: {length_graph(network_graph)}")
 
     green_only_subsets = get_connected_subsets(network_graph, is_green_only)
     green_orange_subsets = get_connected_subsets(network_graph, is_green_orange)
 
-    print("Green only subsets:")
     green_only_df = create_subset_dataframe(network_graph, green_only_subsets)
-
-    print("Green orange subsets:")
     green_orange_df = create_subset_dataframe(network_graph, green_orange_subsets)
 
-    final_total = green_only_df['green_quantity'].sum() + green_orange_df['green_quantity'].sum() + green_orange_df[
-        'orange_quantity'].sum()
-    print(f"Final total length: {final_total}")
-    print(f"Difference from initial: {final_total - initial_total}")
+
 
     return green_only_df, green_orange_df
