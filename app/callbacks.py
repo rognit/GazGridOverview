@@ -1,7 +1,7 @@
 import customtkinter
 
 from app.core_logic.calculator import compute_parameters
-from config import MIN_SHOWING_MARKER_THRESHOLD
+from config import *
 
 
 def search_event(app, event=None):
@@ -17,12 +17,12 @@ def change_region(app):
                 app.map_widget.set_path(row['coordinates'], color=row['color'])
             if app.markers_toggle_switch.get() == 1:
                 for _, row in app.green_marker_df.iterrows():
-                    if row['green_quantity'] > MIN_SHOWING_MARKER_THRESHOLD and row['region'] == region:
+                    if row['green_quantity'] > int(app.showing_marker_threshold_entry.get()) and row['region'] == region:
                         app.map_widget.set_marker(*row['coordinates'], text=f"{row['green_quantity'] / 1e3:.3f} km",
                                                    marker_color_circle="#3ef50a", marker_color_outside="#1d8001")
                 for _, row in app.orange_marker_df.iterrows():
                     quantity = row['orange_quantity'] + row['green_quantity']
-                    if quantity > MIN_SHOWING_MARKER_THRESHOLD and row['region'] == region:
+                    if quantity > int(app.showing_marker_threshold_entry.get()) and row['region'] == region:
                         app.map_widget.set_marker(*row['coordinates'], text=f"{quantity / 1e3:.3f} km",
                                                    marker_color_circle="#f5a623", marker_color_outside="#b86b00")
 

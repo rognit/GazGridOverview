@@ -165,8 +165,15 @@ class App(customtkinter.CTk):
         self.merging_threshold_unit = customtkinter.CTkLabel(self.param_frame, text="meters", anchor="w")
         self.merging_threshold_unit.grid(row=3, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
 
+        self.showing_marker_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Marker Threshold:  ", anchor="w")
+        self.showing_marker_threshold_label.grid(row=4, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
+        self.showing_marker_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="blue")
+        self.showing_marker_threshold_entry.grid(row=4, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
+        self.showing_marker_threshold_unit = customtkinter.CTkLabel(self.param_frame, text="meters", anchor="w")
+        self.showing_marker_threshold_unit.grid(row=4, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
+
         self.recalculate_button = customtkinter.CTkButton(self.param_frame, text="Recalculate", command=lambda: self.start_recalculation())
-        self.recalculate_button.grid(row=4, column=0, columnspan=3, padx=(20, 20), pady=(10, 20))
+        self.recalculate_button.grid(row=5, column=0, columnspan=3, padx=(20, 20), pady=(10, 20))
 
         # Network info frame
         self.network_info_frame = customtkinter.CTkFrame(self.frame_left, fg_color=None)
@@ -206,6 +213,7 @@ class App(customtkinter.CTk):
         self.orange_threshold_entry.insert(0, ORANGE_THRESHOLD)
         self.red_threshold_entry.insert(0, RED_THRESHOLD)
         self.merging_threshold_entry.insert(0, MERGING_THRESHOLD)
+        self.showing_marker_threshold_entry.insert(0, MIN_SHOWING_MARKER_THRESHOLD)
 
 
     def create_right_frame(self):
