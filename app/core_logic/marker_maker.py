@@ -38,7 +38,8 @@ def make_markers(df):
         data = []
         for subset_nodes, subset_edges in subsets_with_edges:
             green_quantity = orange_quantity = simplified_length = 0
-            coordinates = points_with_regions = []
+            coordinates = []
+            points_with_regions = []
 
             for _, _, edge_data in subset_edges:
                 lengths = edge_data['lengths']
@@ -67,10 +68,10 @@ def make_markers(df):
 
     network_graph = create_graph()
 
-    initial_total = sum([sum(lengths_str.values()) for lengths_str in df['lengths']])
-    print(f"Initial total length: {initial_total}")
-    total_length = sum([sum(data['lengths'].values()) for _, _, data in network_graph.edges(data=True)])
-    print(f"Total length in graph: {total_length}")
+    #initial_total = sum([sum(lengths_str.values()) for lengths_str in df['lengths']])
+    #print(f"Initial total length: {initial_total}")
+    #total_length = sum([sum(data['lengths'].values()) for _, _, data in network_graph.edges(data=True)])
+    #print(f"Total length in graph: {total_length}")
 
     green_only_subsets = get_connected_subsets(network_graph, is_green_only)
     green_orange_subsets = get_connected_subsets(network_graph, is_green_orange)
