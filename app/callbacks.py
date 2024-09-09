@@ -9,26 +9,48 @@ def search_event(app, event=None):
     app.map_widget.set_address(app.entry.get())
 
 def format_length(length):
-    return f"{length / 1e3:.3f} km"
+        return f"{length / 1e3:.3f} km"
 
 def on_marker_click(marker, type):
+    def pad_line(content, n_color_tags=0):
+        padding = max(0, total_width - len(content) - 4 + n_color_tags * 5)  # 4 for "║ " and " ║"
+        left_padding = padding // 2
+        right_padding = padding - left_padding
+        return ' ' * left_padding + content + ' ' * right_padding
+
+    total_width = 70
     region, (lat, lon), green, orange, simplified = marker.data
-    if type == 'green':
-        print(f"\n{Back.CYAN}{Fore.BLACK} Details for Green marker at position ("
-              f"{Fore.WHITE}{lat:.5f}{Fore.BLACK}, {Fore.WHITE}{lon:.5f}{Fore.BLACK}) in {region}{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(f"{Fore.MAGENTA}● Exhaustive Length: {Fore.WHITE}{format_length(green)}")
-        print(f"{Fore.CYAN}● Simplified Length: {Fore.WHITE}{format_length(simplified)}")
-        print(f"{Fore.GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    else:
-        print(f"\n{Back.CYAN}{Fore.BLACK} Details for Orange marker at position ("
-              f"{Fore.WHITE}{lat:.5f}{Fore.BLACK}, {Fore.WHITE}{lon:.5f}{Fore.BLACK}) in {region}{Style.RESET_ALL}")
-        print(f"{Fore.YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(f"{Fore.GREEN}  Exhaustive Green Length:  {Fore.WHITE}{format_length(green)}")
-        print(f"{Fore.YELLOW}+ Exhaustive Orange Length: {Fore.WHITE}{format_length(orange)}")
-        print(f"{Fore.MAGENTA}= Exhaustive Length:        {Fore.WHITE}{format_length(green + orange)}")
-        print(f"{Fore.CYAN}● Simplified Length:        {Fore.WHITE}{format_length(simplified)}")
-        print(f"{Fore.YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
+    green_length = format_length(green)
+    orange_length = format_length(orange)
+    total_length = format_length(green + orange)
+    simplified_length = format_length(simplified)
+
+    header = f"{type} Marker at {Fore.RED}{lat:.5f}, {lon:.5f}{Fore.CYAN} in {region}"
+
+    padding_len = max(0, total_width - len(header) - 4 + 10)  # 4 for "║ " and " ║", 10 for the color codes
+    left_padding = padding_len // 2
+    right_padding = padding_len - left_padding
+
+    line_green = f"  Exhaustive Green Length : {Fore.WHITE}{green_length} "
+    line_orange = f"+ Exhaustive Orange Length: {Fore.WHITE}{orange_length} "
+    line_exhaustive = f"Exhaustive Length   : {Fore.WHITE}{total_length}"
+    line_simplified = f"Simplified Length   : {Fore.WHITE}{simplified_length}"
+
+    log = f"{Fore.CYAN}╔{'═' * left_padding} {header} {'═' * right_padding}╗\n"
+    if type == 'Green':
+        log += (f"{Fore.CYAN}║ {Fore.MAGENTA}{pad_line(line_exhaustive, 1)}{Fore.CYAN} ║\n"
+                f"{Fore.CYAN}║ {Fore.BLUE}{pad_line(line_simplified, 1)}{Fore.CYAN} ║\n")
+    elif type == 'Orange':
+        log += (f"{Fore.CYAN}║ {Fore.GREEN}{pad_line(line_green, 1)}{Fore.CYAN} ║\n"
+                f"{Fore.CYAN}║ {Fore.YELLOW}{pad_line(line_orange, 1)}{Fore.CYAN} ║\n"
+                f"{Fore.CYAN}║ {Fore.MAGENTA}{pad_line(f"=     {line_exhaustive}", 1)}{Fore.CYAN} ║\n"
+                f"{Fore.CYAN}║ {Fore.BLUE}{pad_line(f"  ↳   [ {line_simplified} {Fore.BLUE}] ", 2)}{Fore.CYAN} ║\n")
+
+    log += f"{Fore.CYAN}╚{'═' * (total_width - 2)}╝{Style.RESET_ALL}\n"
+
+    print(log)
+
 
 def change_region(app):
     app.map_widget.delete_all_path()
@@ -45,7 +67,7 @@ def change_region(app):
                             text=f"{format_length(row['green_quantity'])}",
                             marker_color_circle="#3ef50a",
                             marker_color_outside="#1d8001",
-                            command=lambda marker=row: on_marker_click(marker, 'green')
+                            command=lambda marker=row: on_marker_click(marker, 'Green')
                         )
                         marker.data = row
                 for _, row in app.orange_marker_df.iterrows():
@@ -56,7 +78,7 @@ def change_region(app):
                             text=f"{format_length(quantity)}",
                             marker_color_circle="#f5a623",
                             marker_color_outside="#b86b00",
-                            command=lambda marker=row: on_marker_click(marker, 'orange')
+                            command=lambda marker=row: on_marker_click(marker, 'Orange')
                         )
                         marker.data = row
 
