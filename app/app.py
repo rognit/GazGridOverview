@@ -74,15 +74,7 @@ class App(customtkinter.CTk):
 
     def extract_regions(self):
         regions = self.gaz_df['region'].unique()
-        self.region_dfs_gaz = {
-            region: self.gaz_df[self.gaz_df['region'] == region] for region in regions
-        }
-        self.region_dfs_green_marker = {
-            region: self.green_marker_df[self.green_marker_df['region'] == region] for region in regions
-        }
-        self.region_dfs_orange_marker = {
-            region: self.orange_marker_df[self.orange_marker_df['region'] == region] for region in regions
-        }
+        self.region_dfs_gaz = {region: self.gaz_df[self.gaz_df['region'] == region] for region in regions}
 
         region_counts = {region: len(self.region_dfs_gaz[region]) for region in regions}
         self.region_display_names_gaz = {region: f"{region} ({count})" for region, count in region_counts.items()}

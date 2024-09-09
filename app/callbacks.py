@@ -1,12 +1,34 @@
 import customtkinter
+from colorama import Fore, Back, Style, init
 
 from app.core_logic.calculator import compute_parameters
-from config import *
 
+init(autoreset=True)  # Initialize colorama
 
 def search_event(app, event=None):
     app.map_widget.set_address(app.entry.get())
 
+def format_length(length):
+    return f"{length / 1e3:.3f} km"
+
+def on_marker_click(marker, type):
+    region, (lat, lon), green, orange, simplified = marker.data
+    if type == 'green':
+        print(f"\n{Back.CYAN}{Fore.BLACK} Details for Green marker at position ("
+              f"{Fore.WHITE}{lat:.5f}{Fore.BLACK}, {Fore.WHITE}{lon:.5f}{Fore.BLACK}) in {region}{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(f"{Fore.MAGENTA}● Exhaustive Length: {Fore.WHITE}{format_length(green)}")
+        print(f"{Fore.CYAN}● Simplified Length: {Fore.WHITE}{format_length(simplified)}")
+        print(f"{Fore.GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    else:
+        print(f"\n{Back.CYAN}{Fore.BLACK} Details for Orange marker at position ("
+              f"{Fore.WHITE}{lat:.5f}{Fore.BLACK}, {Fore.WHITE}{lon:.5f}{Fore.BLACK}) in {region}{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(f"{Fore.GREEN}  Exhaustive Green Length:  {Fore.WHITE}{format_length(green)}")
+        print(f"{Fore.YELLOW}+ Exhaustive Orange Length: {Fore.WHITE}{format_length(orange)}")
+        print(f"{Fore.MAGENTA}= Exhaustive Length:        {Fore.WHITE}{format_length(green + orange)}")
+        print(f"{Fore.CYAN}● Simplified Length:        {Fore.WHITE}{format_length(simplified)}")
+        print(f"{Fore.YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
 def change_region(app):
     app.map_widget.delete_all_path()
@@ -18,13 +40,25 @@ def change_region(app):
             if app.markers_toggle_switch.get() == 1:
                 for _, row in app.green_marker_df.iterrows():
                     if row['green_quantity'] > int(app.showing_marker_threshold_entry.get()) and row['region'] == region:
-                        app.map_widget.set_marker(*row['coordinates'], text=f"{row['green_quantity'] / 1e3:.3f} km",
-                                                   marker_color_circle="#3ef50a", marker_color_outside="#1d8001")
+                        marker = app.map_widget.set_marker(
+                            *row['coordinates'],
+                            text=f"{format_length(row['green_quantity'])}",
+                            marker_color_circle="#3ef50a",
+                            marker_color_outside="#1d8001",
+                            command=lambda marker=row: on_marker_click(marker, 'green')
+                        )
+                        marker.data = row
                 for _, row in app.orange_marker_df.iterrows():
                     quantity = row['orange_quantity'] + row['green_quantity']
                     if quantity > int(app.showing_marker_threshold_entry.get()) and row['region'] == region:
-                        app.map_widget.set_marker(*row['coordinates'], text=f"{quantity / 1e3:.3f} km",
-                                                   marker_color_circle="#f5a623", marker_color_outside="#b86b00")
+                        marker = app.map_widget.set_marker(
+                            *row['coordinates'],
+                            text=f"{format_length(quantity)}",
+                            marker_color_circle="#f5a623",
+                            marker_color_outside="#b86b00",
+                            command=lambda marker=row: on_marker_click(marker, 'orange')
+                        )
+                        marker.data = row
 
 
 def change_map(app, new_map):
