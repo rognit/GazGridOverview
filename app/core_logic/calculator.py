@@ -28,7 +28,7 @@ def compute_parameters(gaz_df, pop_df,
     progress_callback(85)
 
     # We want to highlight the issues above. So green will be drawn under yellow, then yellow under orange, etc.
-    color_order = pd.CategoricalDtype(categories=['green', 'yellow', 'orange', 'brown', 'red'], ordered=True)
+    color_order = pd.CategoricalDtype(categories=['green', 'orange', 'red'], ordered=True)
     exhaustive_gaz_df['color'] = exhaustive_gaz_df['color'].astype(color_order)
     simplified_gaz_df['color'] = simplified_gaz_df['color'].astype(color_order)
     exhaustive_gaz_df = exhaustive_gaz_df.sort_values(by=['region', 'color'])

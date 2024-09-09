@@ -70,14 +70,10 @@ def simplify_segments(colored_gaz_df, merging_threshold, show_tqdm):
         match lengths['red'], lengths['orange'], lengths['green']:
             case 0, 0, green if green > 0:
                 return 'green'
-            case 0, orange, 0 if orange > 0:
+            case 0, orange, _ if orange > 0:
                 return 'orange'
-            case 0, orange, green if orange > 0 and green > 0:
-                return 'yellow'
-            case red, 0, 0 if red > 0:
-                return 'red'
             case red, _, _ if red > 0:
-                return 'brown'
+                return 'red'
             case _, _, _:
                 print(f"Unexpected lengths: {lengths}")
                 return 'red'
