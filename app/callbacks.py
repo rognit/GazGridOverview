@@ -86,12 +86,15 @@ def change_region(app):
 
 
 def change_map(app, new_map):
-    if new_map == "Open Street Map":
+    if new_map == "<<Open Street Map>>":
         app.map_widget.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
     elif new_map == "Google Map (classic)":
         app.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
     elif new_map == "Google Map (satellite)":
         app.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
+    elif new_map == "OACI":
+        app.map_widget.set_tile_server("https://geoservices.ign.fr/cartes/oaci/{z}/{x}/{y}.png", max_zoom=18)
+
 
 
 def change_appearance_mode(app, new_appearance_mode):
@@ -117,6 +120,13 @@ def toggle_markers(app):
     else:  # Switch is on (Show markers)
         change_region(app)
 
+def refresh_informations(app):
+    app.green_network_length_label.configure(text=format_length(app.green_network_length))
+    app.orange_network_length_label.configure(text=format_length(app.orange_network_length))
+    app.red_network_length_label.configure(text=format_length(app.red_network_length))
+    app.exhaustive_network_length_label.configure(text=format_length(app.exhaustive_network_length))
+    app.simplified_network_length_label.configure(text=format_length(app.simplified_network_length))
+
 def recalculate_segments(app):
 
     app.simplified_gaz_df, app.exhaustive_gaz_df, app.information_df, app.green_marker_df, app.orange_marker_df = \
@@ -136,4 +146,5 @@ def recalculate_segments(app):
 
     app.extract_regions()
     change_region(app)
+    refresh_informations(app)
     app.hide_loading_screen()

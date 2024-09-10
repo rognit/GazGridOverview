@@ -80,8 +80,6 @@ def simplify_segments(colored_gaz_df, merging_threshold, show_tqdm):
 
 
     centroid_df = create_centroid_df(make_clusters(colored_gaz_df))
-
-    centroid_df.to_csv("centroid.csv")
     centroid_df.index = centroid_df.index.map(lambda x: tuple(map(float, x)))
 
     iterator = tqdm(colored_gaz_df.itertuples(index=False), desc="Simplifying Segments", total=len(colored_gaz_df)) \

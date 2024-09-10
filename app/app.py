@@ -224,7 +224,7 @@ class App(customtkinter.CTk):
         self.map_label.grid(row=5, column=0, padx=(20, 20), pady=(10, 10), sticky="sw")
         self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left,
                                                            values=["Open Street Map", "Google Map (classic)",
-                                                                   "Google Map (satellite)"],
+                                                                   "Google Map (satellite)", "OACI"],
                                                            command=lambda new_map: change_map(self, new_map))
         self.map_option_menu.grid(row=5, column=0, padx=(20, 20), pady=(10, 10), sticky="se")
 

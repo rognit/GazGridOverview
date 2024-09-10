@@ -51,7 +51,6 @@ def compute_parameters(gaz_df, pop_df,
     progress_callback(90)
     exhaustive_gaz_df = make_paths(exhaustive_gaz_df, show_tqdm,
                                    desc="Making paths for exhaustive segments region by region")
-    simplified_gaz_df.to_csv('df.csv')
 
     progress_callback(95)
     simplified_gaz_df = make_paths(simplified_gaz_df, show_tqdm,
