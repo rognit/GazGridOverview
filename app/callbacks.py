@@ -65,6 +65,7 @@ def change_region(app):
                         marker = app.map_widget.set_marker(
                             *row['coordinates'],
                             text=f"{format_length(row['green_quantity'])}",
+                            text_color="#000000",
                             marker_color_circle="#3ef50a",
                             marker_color_outside="#1d8001",
                             command=lambda marker=row: on_marker_click(marker, 'Green')
@@ -76,6 +77,7 @@ def change_region(app):
                         marker = app.map_widget.set_marker(
                             *row['coordinates'],
                             text=f"{format_length(quantity)}",
+                            text_color="#000000",
                             marker_color_circle="#f5a623",
                             marker_color_outside="#b86b00",
                             command=lambda marker=row: on_marker_click(marker, 'Orange')
