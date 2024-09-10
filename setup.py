@@ -47,13 +47,16 @@ def main():
 
     print("Processing raw data...", flush=True)
 
+    # Read raw csv files
     raw_df_pop = pd.read_csv(os.path.normpath(INIT_POPULATION_PATH), dtype=dtype_pop_dict)[['idcar_200m', 'ind']].copy()
     raw_df_grt = pd.read_csv(os.path.normpath(INIT_GRT_PATH), delimiter=';')
     raw_df_terega = pd.read_csv(os.path.normpath(INIT_TEREGA_PATH), delimiter=';')
 
+    # Process raw data
     df_gaz = process_gaz(raw_df_grt, raw_df_terega)
     df_pop = process_pop(raw_df_pop)
 
+    # Save processed data
     df_gaz.to_csv(os.path.normpath(BASE_GAZ_NETWORK_PATH), index=False)
     df_pop.to_csv(os.path.normpath(BASE_POPULATION_PATH))
 

@@ -36,10 +36,17 @@ def compute_parameters(gaz_df, pop_df,
 
     green_markers_df, orange_markers_df = make_markers(simplified_gaz_df)
 
+    # Compute several important lengths of the network
+    green_network_length = exhaustive_gaz_df[exhaustive_gaz_df['color'] == 'green']['length'].sum()
+    orange_network_length = exhaustive_gaz_df[exhaustive_gaz_df['color'] == 'orange']['length'].sum()
+    red_network_length = exhaustive_gaz_df[exhaustive_gaz_df['color'] == 'red']['length'].sum()
     exhaustive_network_length = exhaustive_gaz_df['length'].sum()
     simplified_network_length = simplified_gaz_df['length'].sum()
-    information_df = pd.DataFrame({'exhaustive_network_length': [exhaustive_network_length],
-                                   'simplified_network_length': [simplified_network_length]})
+    information_df = pd.DataFrame({'green_network_length': [green_network_length],
+                                   'orange_network_length': [orange_network_length],
+                                   'red_network_length': [red_network_length],
+                                   'exhaustive_network_length': [exhaustive_network_length],
+                                   'simplified_network_length': [simplified_network_length],})
 
     progress_callback(90)
     exhaustive_gaz_df = make_paths(exhaustive_gaz_df, show_tqdm,

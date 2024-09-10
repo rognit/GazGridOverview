@@ -13,7 +13,7 @@ from config import *
 class App(customtkinter.CTk):
     APP_NAME = "Gaz Grid Overview"
     WIDTH = 1400
-    HEIGHT = 1000
+    HEIGHT = 1100
 
     def __init__(self, base_gaz_network_path, base_population_path, simplified_gaz_network_path,
                  exhaustive_gaz_network_path, information_path, green_marker_path, orange_marker_path, icon_path):
@@ -40,7 +40,7 @@ class App(customtkinter.CTk):
         self.exhaustive_gaz_df['coordinates'] = self.exhaustive_gaz_df['coordinates'].apply(lambda x: eval(x))
 
         self.information_df = pd.read_csv(information_path)
-        self.exhaustive_network_length, self.simplified_network_length = self.information_df.iloc[0]
+        self.green_network_length, self.orange_network_length, self.red_network_length, self.exhaustive_network_length, self.simplified_network_length = self.information_df.iloc[0]
 
         self.green_marker_df = pd.read_csv(green_marker_path)
         self.green_marker_df['coordinates'] = self.green_marker_df['coordinates'].apply(lambda x: eval(x))
@@ -169,19 +169,55 @@ class App(customtkinter.CTk):
 
         # Network info frame
         self.network_info_frame = customtkinter.CTkFrame(self.frame_left, fg_color=None)
-        self.network_info_frame.grid(row=4, column=0, columnspan=2, padx=(20, 20), pady=(20, 10), sticky="ew")
+        self.network_info_frame.grid(row=4, column=0, columnspan=2, padx=(20, 20), pady=(10, 5), sticky="ew")
 
-        self.exhaustive_network_text_label = customtkinter.CTkLabel(self.network_info_frame, text="Exhaustive network length :  ", font=("Helvetica", 14))
-        self.exhaustive_network_text_label.grid(row=0, column=0, padx=(10, 0), pady=(5, 5), sticky="e")
+        self.green_network_text_label = customtkinter.CTkLabel(self.network_info_frame, text="Green network length :  ",
+                                                               font=("Helvetica", 14),
+                                                               text_color="#2e8b57")  # Sea Green
+        self.green_network_text_label.grid(row=0, column=0, padx=(10, 0), pady=(2, 2), sticky="e")
+        self.green_network_length_label = customtkinter.CTkLabel(self.network_info_frame,
+                                                                 text=f"{self.green_network_length / 1000:,.3f} km".replace(
+                                                                     ",", " "), font=("Helvetica", 14, "bold"))
+        self.green_network_length_label.grid(row=0, column=1, padx=(0, 10), pady=(2, 2), sticky="w")
+
+        self.orange_network_text_label = customtkinter.CTkLabel(self.network_info_frame,
+                                                                text="Orange network length :  ",
+                                                                font=("Helvetica", 14),
+                                                                text_color="#d2691e")  # Chocolate
+        self.orange_network_text_label.grid(row=1, column=0, padx=(10, 0), pady=(2, 2), sticky="e")
+        self.orange_network_length_label = customtkinter.CTkLabel(self.network_info_frame,
+                                                                  text=f"{self.orange_network_length / 1000:,.3f} km".replace(
+                                                                      ",", " "), font=("Helvetica", 14, "bold"))
+        self.orange_network_length_label.grid(row=1, column=1, padx=(0, 10), pady=(2, 2), sticky="w")
+
+        self.red_network_text_label = customtkinter.CTkLabel(self.network_info_frame, text="Red network length :  ",
+                                                             font=("Helvetica", 14), text_color="#b22222")  # Firebrick
+        self.red_network_text_label.grid(row=2, column=0, padx=(10, 0), pady=(2, 2), sticky="e")
+        self.red_network_length_label = customtkinter.CTkLabel(self.network_info_frame,
+                                                               text=f"{self.red_network_length / 1000:,.3f} km".replace(
+                                                                   ",", " "), font=("Helvetica", 14, "bold"))
+        self.red_network_length_label.grid(row=2, column=1, padx=(0, 10), pady=(2, 2), sticky="w")
+
+        self.exhaustive_network_text_label = customtkinter.CTkLabel(self.network_info_frame,
+                                                                    text="Exhaustive network length :  ",
+                                                                    font=("Helvetica", 14),
+                                                                    text_color="#8a2be2")  # Blue Violet
+        self.exhaustive_network_text_label.grid(row=3, column=0, padx=(10, 0), pady=(2, 2), sticky="e")
         self.exhaustive_network_length_label = customtkinter.CTkLabel(self.network_info_frame,
-            text=f"{self.exhaustive_network_length / 1000:,.3f} km".replace(",", " "), font=("Helvetica", 14, "bold"))
-        self.exhaustive_network_length_label.grid(row=0, column=1, padx=(0, 10), pady=(5, 5), sticky="w")
+                                                                      text=f"{self.exhaustive_network_length / 1000:,.3f} km".replace(
+                                                                          ",", " "), font=("Helvetica", 14, "bold"))
+        self.exhaustive_network_length_label.grid(row=3, column=1, padx=(0, 10), pady=(2, 2), sticky="w")
 
-        self.simplified_network_text_label = customtkinter.CTkLabel(self.network_info_frame, text="Simplified network length :  ", font=("Helvetica", 14))
-        self.simplified_network_text_label.grid(row=1, column=0, padx=(10, 0), pady=(5, 5), sticky="e")
+        self.simplified_network_text_label = customtkinter.CTkLabel(self.network_info_frame,
+                                                                    text="Simplified network length :  ",
+                                                                    font=("Helvetica", 14),
+                                                                    text_color="#4682b4")  # Steel Blue
+        self.simplified_network_text_label.grid(row=4, column=0, padx=(10, 0), pady=(2, 2), sticky="e")
         self.simplified_network_length_label = customtkinter.CTkLabel(self.network_info_frame,
-            text=f"{self.simplified_network_length / 1000:,.3f} km".replace(",", " "), font=("Helvetica", 14, "bold"))
-        self.simplified_network_length_label.grid(row=1, column=1, padx=(0, 10), pady=(5, 5), sticky="w")
+                                                                      text=f"{self.simplified_network_length / 1000:,.3f} km".replace(
+                                                                          ",", " "), font=("Helvetica", 14, "bold"))
+        self.simplified_network_length_label.grid(row=4, column=1, padx=(0, 10), pady=(2, 2), sticky="w")
+
 
         # Background and appearance options
         self.map_label = customtkinter.CTkLabel(self.frame_left, text="Background:", anchor="w")

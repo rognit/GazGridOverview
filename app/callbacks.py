@@ -130,7 +130,8 @@ def recalculate_segments(app):
             progress_callback=app.update_progress
         )
 
-    app.exhaustive_network_length, app.simplified_network_length = app.information_df.iloc[0]
+    app.green_network_length, app.orange_network_length, app.red_network_length, app.exhaustive_network_length, \
+        app.simplified_network_length = app.information_df.iloc[0]
     app.gaz_df = app.exhaustive_gaz_df if app.view_mode == "exhaustive" else app.simplified_gaz_df
 
     app.extract_regions()
