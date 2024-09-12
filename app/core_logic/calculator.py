@@ -27,6 +27,8 @@ def compute_parameters(gaz_df, pop_df,
 
     progress_callback(85)
 
+    exhaustive_gaz_df.to_csv('df2.csv')
+
     # We want to highlight the issues above. So green will be drawn under yellow, then yellow under orange, etc.
     color_order = pd.CategoricalDtype(categories=['green', 'orange', 'red'], ordered=True)
     exhaustive_gaz_df['color'] = exhaustive_gaz_df['color'].astype(color_order)
@@ -34,6 +36,7 @@ def compute_parameters(gaz_df, pop_df,
     exhaustive_gaz_df = exhaustive_gaz_df.sort_values(by=['region', 'color'])
     simplified_gaz_df = simplified_gaz_df.sort_values(by=['region', 'color'])
 
+    exhaustive_gaz_df.to_csv('df3.csv')
     green_markers_df, orange_markers_df = make_markers(simplified_gaz_df)
 
     # Compute several important lengths of the network
@@ -51,7 +54,7 @@ def compute_parameters(gaz_df, pop_df,
     progress_callback(90)
     exhaustive_gaz_df = make_paths(exhaustive_gaz_df, show_tqdm,
                                    desc="Making paths for exhaustive segments region by region")
-
+    exhaustive_gaz_df.to_csv('df4.csv')
     progress_callback(95)
     simplified_gaz_df = make_paths(simplified_gaz_df, show_tqdm,
                                    desc="Making paths for simplified segments region by region")

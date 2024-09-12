@@ -76,11 +76,10 @@ class App(customtkinter.CTk):
         regions = self.gaz_df['region'].unique()
         self.region_dfs_gaz = {region: self.gaz_df[self.gaz_df['region'] == region] for region in regions}
 
-        # region_counts = {region: len(self.region_dfs_gaz[region]) for region in regions}
-        # Sum the length of each region instead of counting the number of segments
-        region_counts = {region: self.region_dfs_gaz[region]['length'].sum() for region in regions}
+        # Convert length from meters (float) to kilometers (int)
+        region_counts = {region: int(self.region_dfs_gaz[region]['length'].sum() / 1000) for region in regions}
 
-        self.region_display_names_gaz = {region: f"{region} ({count})" for region, count in region_counts.items()}
+        self.region_display_names_gaz = {region: f"{region} ({count} km)" for region, count in region_counts.items()}
 
         # Refreshing the display of region labels because their paths number has surely changed
         if hasattr(self, 'region_checkboxes_gaz'):

@@ -157,7 +157,6 @@ def color_segments(gaz_df, pop_df, buffer_distance, orange_threshold, red_thresh
 
         return get_color_from_squares(segment_squares)
 
-    progress_callback(0)
     colored_gaz_df = gaz_df.copy()
 
     total_segments = len(colored_gaz_df)
@@ -170,5 +169,5 @@ def color_segments(gaz_df, pop_df, buffer_distance, orange_threshold, red_thresh
         colored_gaz_df.at[row.Index, 'color'] = color
         if idx % 100 == 0:
             progress_callback(int((idx / total_segments) * 80))
-
+    colored_gaz_df.to_csv('df1.csv')
     return colored_gaz_df
