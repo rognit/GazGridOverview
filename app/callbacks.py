@@ -99,10 +99,6 @@ def change_map(app, new_map):
         )
 
 
-
-
-
-
 def change_appearance_mode(app, new_appearance_mode):
     customtkinter.set_appearance_mode(new_appearance_mode)
 

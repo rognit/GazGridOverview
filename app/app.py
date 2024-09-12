@@ -76,7 +76,10 @@ class App(customtkinter.CTk):
         regions = self.gaz_df['region'].unique()
         self.region_dfs_gaz = {region: self.gaz_df[self.gaz_df['region'] == region] for region in regions}
 
-        region_counts = {region: len(self.region_dfs_gaz[region]) for region in regions}
+        # region_counts = {region: len(self.region_dfs_gaz[region]) for region in regions}
+        # Sum the length of each region instead of counting the number of segments
+        region_counts = {region: self.region_dfs_gaz[region]['length'].sum() for region in regions}
+
         self.region_display_names_gaz = {region: f"{region} ({count})" for region, count in region_counts.items()}
 
         # Refreshing the display of region labels because their paths number has surely changed
@@ -129,35 +132,35 @@ class App(customtkinter.CTk):
         self.param_frame = customtkinter.CTkFrame(self.frame_left, fg_color=None)
         self.param_frame.grid(row=2, column=0, padx=(20, 20), pady=(10, 20), sticky="nsew")
 
-        self.buffer_distance_label = customtkinter.CTkLabel(self.param_frame, text="Buffer Distance:  ", anchor="w")
+        self.buffer_distance_label = customtkinter.CTkLabel(self.param_frame, text="Buffer Distance =  ", anchor="w")
         self.buffer_distance_label.grid(row=0, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
         self.buffer_distance_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="green")
         self.buffer_distance_entry.grid(row=0, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
         self.buffer_distance_unit = customtkinter.CTkLabel(self.param_frame, text="meters", anchor="w")
         self.buffer_distance_unit.grid(row=0, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
 
-        self.orange_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Orange Threshold:  ", anchor="w")
+        self.orange_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Orange Pipe >  ", anchor="w")
         self.orange_threshold_label.grid(row=1, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
         self.orange_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="orange")
         self.orange_threshold_entry.grid(row=1, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
         self.orange_threshold_unit = customtkinter.CTkLabel(self.param_frame, text="hab/km²", anchor="w")
         self.orange_threshold_unit.grid(row=1, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
 
-        self.red_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Red Threshold:  ", anchor="w")
+        self.red_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Red Pipe >  ", anchor="w")
         self.red_threshold_label.grid(row=2, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
         self.red_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="red")
         self.red_threshold_entry.grid(row=2, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
         self.red_threshold_unit = customtkinter.CTkLabel(self.param_frame, text="hab/km²", anchor="w")
         self.red_threshold_unit.grid(row=2, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
 
-        self.merging_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Merging Threshold:  ", anchor="w")
+        self.merging_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Merging Nodes <  ", anchor="w")
         self.merging_threshold_label.grid(row=3, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
         self.merging_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="purple")
         self.merging_threshold_entry.grid(row=3, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
         self.merging_threshold_unit = customtkinter.CTkLabel(self.param_frame, text="meters", anchor="w")
         self.merging_threshold_unit.grid(row=3, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
 
-        self.showing_marker_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Marker Threshold:  ", anchor="w")
+        self.showing_marker_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Showing Marker >  ", anchor="w")
         self.showing_marker_threshold_label.grid(row=4, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
         self.showing_marker_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="blue")
         self.showing_marker_threshold_entry.grid(row=4, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
@@ -171,7 +174,7 @@ class App(customtkinter.CTk):
         self.network_info_frame = customtkinter.CTkFrame(self.frame_left, fg_color=None)
         self.network_info_frame.grid(row=4, column=0, columnspan=2, padx=(20, 20), pady=(10, 5), sticky="ew")
 
-        self.green_network_text_label = customtkinter.CTkLabel(self.network_info_frame, text="Green network length :  ",
+        self.green_network_text_label = customtkinter.CTkLabel(self.network_info_frame, text="Green length :   ",
                                                                font=("Helvetica", 14),
                                                                text_color="#2e8b57")  # Sea Green
         self.green_network_text_label.grid(row=0, column=0, padx=(10, 0), pady=(2, 2), sticky="e")
@@ -181,7 +184,7 @@ class App(customtkinter.CTk):
         self.green_network_length_label.grid(row=0, column=1, padx=(0, 10), pady=(2, 2), sticky="w")
 
         self.orange_network_text_label = customtkinter.CTkLabel(self.network_info_frame,
-                                                                text="Orange network length :  ",
+                                                                text="Orange length :   ",
                                                                 font=("Helvetica", 14),
                                                                 text_color="#d2691e")  # Chocolate
         self.orange_network_text_label.grid(row=1, column=0, padx=(10, 0), pady=(2, 2), sticky="e")
@@ -190,7 +193,7 @@ class App(customtkinter.CTk):
                                                                       ",", " "), font=("Helvetica", 14, "bold"))
         self.orange_network_length_label.grid(row=1, column=1, padx=(0, 10), pady=(2, 2), sticky="w")
 
-        self.red_network_text_label = customtkinter.CTkLabel(self.network_info_frame, text="Red network length :  ",
+        self.red_network_text_label = customtkinter.CTkLabel(self.network_info_frame, text="Red length :   ",
                                                              font=("Helvetica", 14), text_color="#b22222")  # Firebrick
         self.red_network_text_label.grid(row=2, column=0, padx=(10, 0), pady=(2, 2), sticky="e")
         self.red_network_length_label = customtkinter.CTkLabel(self.network_info_frame,
@@ -199,7 +202,7 @@ class App(customtkinter.CTk):
         self.red_network_length_label.grid(row=2, column=1, padx=(0, 10), pady=(2, 2), sticky="w")
 
         self.exhaustive_network_text_label = customtkinter.CTkLabel(self.network_info_frame,
-                                                                    text="Exhaustive network length :  ",
+                                                                    text="Exhaustive length :   ",
                                                                     font=("Helvetica", 14),
                                                                     text_color="#8a2be2")  # Blue Violet
         self.exhaustive_network_text_label.grid(row=3, column=0, padx=(10, 0), pady=(2, 2), sticky="e")
@@ -209,7 +212,7 @@ class App(customtkinter.CTk):
         self.exhaustive_network_length_label.grid(row=3, column=1, padx=(0, 10), pady=(2, 2), sticky="w")
 
         self.simplified_network_text_label = customtkinter.CTkLabel(self.network_info_frame,
-                                                                    text="Simplified network length :  ",
+                                                                    text="Simplified length :   ",
                                                                     font=("Helvetica", 14),
                                                                     text_color="#4682b4")  # Steel Blue
         self.simplified_network_text_label.grid(row=4, column=0, padx=(10, 0), pady=(2, 2), sticky="e")
