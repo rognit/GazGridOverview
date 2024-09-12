@@ -86,14 +86,20 @@ def change_region(app):
 
 
 def change_map(app, new_map):
-    if new_map == "<<Open Street Map>>":
+    if new_map == "Open Street Map":
         app.map_widget.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
     elif new_map == "Google Map (classic)":
         app.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
     elif new_map == "Google Map (satellite)":
         app.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
     elif new_map == "OACI":
-        app.map_widget.set_tile_server("https://geoservices.ign.fr/cartes/oaci/{z}/{x}/{y}.png", max_zoom=18)
+        app.map_widget.set_tile_server(
+            "https://data.geopf.fr/private/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN-OACI&STYLE=normal&TILEMATRIXSET=PM_6_11&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg&apikey=ign_scan_ws",
+            max_zoom=11
+        )
+
+
+
 
 
 
