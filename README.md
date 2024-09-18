@@ -14,37 +14,49 @@ The core of this project is the intersection between population data from INSEE 
 
 ## Features
 
+### Network
+
+- **Base View**: Visualisation of the French gaz network (exhaustive view)
+- **Simplified View**: Visualization of a simpler version of the network (by merging nearby nodes)
+
+### Marker
+
+- **Displaying of**:
+    - **Green Marker**: Display of green segments
+    - **Orange Marker**: Display of orange segments
+
+
+### Other Features
+
+- **Four supported map backgrounds**: (API call)
+    - OpenStreetMap
+    - Classic Google Maps
+    - Google Maps satellite
+    - OACI map
+
 - **Interactive visualization** of the French metropolitan gas network with the ability to toggle regions on/off (local data).
-- **Three supported map backgrounds**: (API call)
-  - OpenStreetMap
-  - Classic Google Maps
-  - Google Maps satellite
+
 - **Detailed information on each segment**:
-  - Population density above the network (segment overflight difficulty) with three color levels:
-    - **Green**: less than 250 inhabitants/km² (no overflight restriction)
-    - **Orange**: between 250 and 2500 inhabitants/km² (authorization required)
-    - **Red**: more than 2500 inhabitants/km² (overflight impossible)
+    - Population density above the network (segment overflight difficulty) with three color levels:
+        - **Green**: less than 250 inhabitants/km² (no overflight restriction)
+        - **Orange**: between 250 and 2500 inhabitants/km² (authorization required)
+        - **Red**: more than 2500 inhabitants/km² (overflight impossible)
 - **Ability to recalculate segment colors** with different parameters:
-  - **Buffer distance**: The buffer distance on either side of each segment (default 200m)
-  - **Orange Threshold**: The population density at which a green segment becomes orange (default 250 inhabitants/km²)
-  - **Red Threshold**: The population density at which an orange segment becomes red (default 2500 inhabitants/km²)
+    - **Buffer Distance**: The buffer distance on either side of each segment (default 200m)
+    - **Orange Pipe Threshold**: The population density at which a green segment becomes orange (default 250 inhabitants/km²)
+    - **Red Pipe Threshold**: The population density at which an orange segment becomes red (default 2500 inhabitants/km²)
+    - **Merging Node Threshold**: Diameter of node merge cluster (default 50m)
+    - **Marker Showing Threshold**: Minimum length of marker segment group to display the marker. It's more a display parameter than a calculation parameter (default 5 km)
+- **Markers**:
+    - **Green**: for green segments
+    - **Orange**: for orange segments
+- **Network visualization**:
+    
+    
+- **Ability to display markers**:
+    - **Green**: for green segments
+    - **Orange**: for orange segments
 
-## Algorithm Details
-
-For each segment:
-- **For the edge**:
-
-  <div style="text-align: center;">
-    <img src="doc/images/edge.png" alt="edge" />
-  </div>
-
-- **For the two vertices**:
-
-  <div style="text-align: center;">
-    <img src="doc/images/vertex.png" alt="vertex" />
-  </div>
-
-All squares with at least one point within `buffer_distance` of the segment are considered in the color calculation. The segment color is determined by the highest population density among all retrieved squares.
 
 ## Installation
 
@@ -96,11 +108,27 @@ python main.py
 ### Build version:
 
 ```bash
-pyinstaller --onefile --icon='resources/icon.ico' --add-data 'resources/base_gaz_network.csv:resources' --add-data 'resources/base_population.csv:resources' --add-data 'resources/simplified_computed_gaz_network.csv:resources' --add-data 'resources/exhaustive_computed_gaz_network.csv:resources' --add-data 'resources/information.csv:resources' --add-data 'resources/green_markers.csv:resources' --add-data 'resources/orange_markers.csv:resources' --name GazGridOverview main.py
+pyinstaller --onefile --icon='resources/icon.ico' --add-data 'resources/icon.ico:resources' --add-data 'resources/base_gaz_network.csv:resources' --add-data 'resources/base_population.csv:resources' --add-data 'resources/simplified_computed_gaz_network.csv:resources' --add-data 'resources/exhaustive_computed_gaz_network.csv:resources' --add-data 'resources/information.csv:resources' --add-data 'resources/green_markers.csv:resources' --add-data 'resources/orange_markers.csv:resources' --name GazGridOverview main.py
 ```
 
 The build file will then be located in the `dist/` folder.
 
+## Algorithm Details
+
+For each segment:
+- **For the edge**:
+
+  <div style="text-align: center;">
+    <img src="doc/images/edge.png" alt="edge" />
+  </div>
+
+- **For the two vertices**:
+
+  <div style="text-align: center;">
+    <img src="doc/images/vertex.png" alt="vertex" />
+  </div>
+
+All squares with at least one point within `buffer_distance` of the segment are considered in the color calculation. The segment color is determined by the highest population density among all retrieved squares.
 
 
 

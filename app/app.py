@@ -154,14 +154,14 @@ class App(customtkinter.CTk):
 
         self.merging_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Merging Nodes <  ", anchor="w")
         self.merging_threshold_label.grid(row=3, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
-        self.merging_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="purple")
+        self.merging_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="blue")
         self.merging_threshold_entry.grid(row=3, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
         self.merging_threshold_unit = customtkinter.CTkLabel(self.param_frame, text="meters", anchor="w")
         self.merging_threshold_unit.grid(row=3, column=2, padx=(0, 20), pady=(10, 0), sticky="w")
 
         self.showing_marker_threshold_label = customtkinter.CTkLabel(self.param_frame, text="Showing Marker >  ", anchor="w")
         self.showing_marker_threshold_label.grid(row=4, column=0, padx=(20, 0), pady=(10, 0), sticky="e")
-        self.showing_marker_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="blue")
+        self.showing_marker_threshold_entry = customtkinter.CTkEntry(self.param_frame, width=80, border_width=2, border_color="purple")
         self.showing_marker_threshold_entry.grid(row=4, column=1, padx=(0, 5), pady=(10, 0), sticky="w")
         self.showing_marker_threshold_unit = customtkinter.CTkLabel(self.param_frame, text="meters", anchor="w")
         self.showing_marker_threshold_unit.grid(row=4, column=2, padx=(0, 20), pady=(10, 0), sticky="w")

@@ -169,5 +169,5 @@ def color_segments(gaz_df, pop_df, buffer_distance, orange_threshold, red_thresh
         colored_gaz_df.at[row.Index, 'color'] = color
         if idx % 100 == 0:
             progress_callback(int((idx / total_segments) * 80))
-    colored_gaz_df.to_csv('df1.csv')
+
     return colored_gaz_df
