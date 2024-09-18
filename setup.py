@@ -3,8 +3,8 @@ import os
 import pandas as pd
 
 from config import *
-from app.calculator import compute_parameters
-from app.pre_processing import process_gaz, process_pop
+from app.core_logic.calculator import compute_parameters
+from app.raw_csv_processing import process_gaz, process_pop
 
 
 def main():
@@ -45,21 +45,30 @@ def main():
         'ind_inc': float
     }
 
-    raw_df_pop = pd.read_csv(os.path.normpath(INIT_POPULATION_PATH), dtype=dtype_pop_dict)[
-        ['idcar_200m', 'ind']].copy()
+    print("Processing raw data...", flush=True)
+
+    # Read raw csv files
+    raw_df_pop = pd.read_csv(os.path.normpath(INIT_POPULATION_PATH), dtype=dtype_pop_dict)[['idcar_200m', 'ind']].copy()
     raw_df_grt = pd.read_csv(os.path.normpath(INIT_GRT_PATH), delimiter=';')
     raw_df_terega = pd.read_csv(os.path.normpath(INIT_TEREGA_PATH), delimiter=';')
 
+    # Process raw data
     df_gaz = process_gaz(raw_df_grt, raw_df_terega)
     df_pop = process_pop(raw_df_pop)
 
+    # Save processed data
     df_gaz.to_csv(os.path.normpath(BASE_GAZ_NETWORK_PATH), index=False)
     df_pop.to_csv(os.path.normpath(BASE_POPULATION_PATH))
 
     print("Initial computing with preset parameters...")
-    computed_df = compute_parameters(df_gaz, df_pop, progress_callback=lambda x: None)
+    simplified_computed_df, exhaustive_computed_df, information_df, green_markers_df, orange_markers_df = \
+        compute_parameters(df_gaz, df_pop, progress_callback=lambda x: None, show_tqdm=True)
 
-    computed_df.to_csv(os.path.normpath(COMPUTED_GAZ_NETWORK_PATH), index=False)
+    simplified_computed_df.to_csv(os.path.normpath(SIMPLIFIED_COMPUTED_GAZ_NETWORK_PATH), index=False)
+    exhaustive_computed_df.to_csv(os.path.normpath(EXHAUSTIVE_COMPUTED_GAZ_NETWORK_PATH), index=False)
+    information_df.to_csv(os.path.normpath(INFORMATION_PATH), index=False)
+    green_markers_df.to_csv(os.path.normpath(GREEN_MARKERS_PATH), index=False)
+    orange_markers_df.to_csv(os.path.normpath(ORANGE_MARKERS_PATH), index=False)
 
     print("\n\nSetup completed successfully!\n\n")
 
