@@ -12,50 +12,52 @@ The core of this project is the intersection between population data from INSEE 
     <img src="doc/images/Screenshot details.png" alt="Screenshot details" />
 </div>
 
+
 ## Features
 
-### Network
+### Base feature
 
-- **Base View**: Visualisation of the French gaz network (exhaustive view)
-- **Simplified View**: Visualization of a simpler version of the network (by merging nearby nodes)
+**Interactive visualization of the French metropolitan gas network**
+- Ability to toggle regions on/off (local data).
+- Population density above each segment (segment overflight difficulty) with three color levels:
+  - **Green**: less than 250 inhabitants/km² (no overflight restriction)
+  - **Orange**: between 250 and 2500 inhabitants/km² (authorization required)
+  - **Red**: more than 2500 inhabitants/km² (overflight impossible)
 
-### Marker
 
-- **Displaying of**:
-    - **Green Marker**: Display of green segments
-    - **Orange Marker**: Display of orange segments
+### Simplified network toggle
+
+- **Exhaustive View**: Visualisation of the classic French gaz network (base view)
+- **Simplified View**: Visualization of a simpler version of the network, made by merging nearby nodes
+
+
+### Marker toggle
+
+A marker highlights a related sub-part of the network, connected, of maximum size, which complies with one of the following rules:
+
+- **Green Marker**: pure green subnetwork (no overflight restriction)
+- **Orange Marker**: subnetwork segments are either green or orange (overflight permission partially required)
 
 
 ### Other Features
 
-- **Four supported map backgrounds**: (API call)
-    - OpenStreetMap
-    - Classic Google Maps
-    - Google Maps satellite
-    - OACI map
+4 supported **map backgrounds**: (API call)
+- **OpenStreetMap**
+- **Classic Google Maps**
+- **Google Maps satellite**
+- **OACI map**
 
-- **Interactive visualization** of the French metropolitan gas network with the ability to toggle regions on/off (local data).
-
-- **Detailed information on each segment**:
-    - Population density above the network (segment overflight difficulty) with three color levels:
-        - **Green**: less than 250 inhabitants/km² (no overflight restriction)
-        - **Orange**: between 250 and 2500 inhabitants/km² (authorization required)
-        - **Red**: more than 2500 inhabitants/km² (overflight impossible)
-- **Ability to recalculate segment colors** with different parameters:
+**Compute panel** with different parameters 
+- To recalculate each **segment color** (exhaustive network therefore simplified network too):
     - **Buffer Distance**: The buffer distance on either side of each segment (default 200m)
     - **Orange Pipe Threshold**: The population density at which a green segment becomes orange (default 250 inhabitants/km²)
     - **Red Pipe Threshold**: The population density at which an orange segment becomes red (default 2500 inhabitants/km²)
+- To recalculate the **merging nodes** (simplified network):
     - **Merging Node Threshold**: Diameter of node merge cluster (default 50m)
+- To control **marker display**:
     - **Marker Showing Threshold**: Minimum length of marker segment group to display the marker. It's more a display parameter than a calculation parameter (default 5 km)
-- **Markers**:
-    - **Green**: for green segments
-    - **Orange**: for orange segments
-- **Network visualization**:
-    
-    
-- **Ability to display markers**:
-    - **Green**: for green segments
-    - **Orange**: for orange segments
+
+**Information panel** with global statistics for the entire network based on current parameters
 
 
 ## Installation
