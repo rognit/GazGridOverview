@@ -28,10 +28,10 @@ This is achieved with exact precision and relatively low complexity by using the
 
 For each segment:
 - **For the edge**:
-
-  <div style="text-align: center;">
+  <p style="text-align: center;">
     <img src="images/edge.png" alt="edge" />
-  </div>
+  </p>
+
 
 - **For the two vertices**:
 

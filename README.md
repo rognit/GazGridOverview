@@ -1,7 +1,7 @@
 # GazGridOverview
-<div style="text-align: center;">
-    <img src="doc/resized_icons/icon4.png" alt="Logo" />
-</div>
+<p style="text-align: center;">
+    <img src="resources/icon.ico" alt="Logo" />
+</p>
 
 GazGridOverview is a project aimed at providing an interactive interface for viewing the flyable sections of the gas network in metropolitan France. This project is designed to offer a clear and intuitive visualization of gas infrastructures, thereby facilitating aerial network monitoring.
 
