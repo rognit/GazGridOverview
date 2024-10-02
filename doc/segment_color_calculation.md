@@ -35,7 +35,7 @@ For each segment:
 
 - **For the two vertices**:
 
-  <div style="text-align: center;">
+  <div align="center">
     <img src="images/vertex.png" alt="vertex" />
   </div>
 

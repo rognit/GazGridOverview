@@ -1,5 +1,5 @@
 # GazGridOverview
-<p style="text-align: center;">
+<p align="center">
     <img src="resources/icon.ico" alt="Logo" />
 </p>
 
