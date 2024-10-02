@@ -24,30 +24,38 @@ The core of this project is the intersection between population data from INSEE 
   - **Orange**: between 250 and 2500 inhabitants/km² (authorization required)
   - **Red**: more than 2500 inhabitants/km² (overflight impossible)
 
+See the [Segment Color Calculation](doc/segment_color_calculation.md#algorithm-details) section for more details.
 
 ### Simplified network toggle
 
 - **Exhaustive View**: Visualisation of the classic French gaz network (base view)
 - **Simplified View**: Visualization of a simpler version of the network, made by merging nearby nodes
 
+See the [Simplified Network Calculation](doc/segment_color_calculation.md#algorithm-details) section for more details.
 
 ### Marker toggle
 
 A marker highlights a related sub-part of the network, connected, of maximum size, which complies with one of the following rules:
-
 - **Green Marker**: pure green subnetwork (no overflight restriction)
 - **Orange Marker**: subnetwork segments are either green or orange (overflight permission partially required)
 
+When a marker is clicked, the key information about the subnetwork are displayed in the console:
+- Exhaustive Green Length (Orange marker only)
+- Exhaustive Orange Length (Orange marker only)
+- Exhaustive Total Length
+- Simplified Total Length
+
+See the [Marker Calculation](doc/segment_color_calculation.md#algorithm-details) section for more details.
 
 ### Other Features
 
-4 supported **map backgrounds**: (API call)
+4 supported **map backgrounds** (API call):
 - **OpenStreetMap**
 - **Classic Google Maps**
 - **Google Maps satellite**
 - **OACI map**
 
-**Compute panel** with different parameters 
+**Compute panel** with different parameters:
 - To recalculate each **segment color** (exhaustive network therefore simplified network too):
     - **Buffer Distance**: The buffer distance on either side of each segment (default 200m)
     - **Orange Pipe Threshold**: The population density at which a green segment becomes orange (default 250 inhabitants/km²)
@@ -57,7 +65,18 @@ A marker highlights a related sub-part of the network, connected, of maximum siz
 - To control **marker display**:
     - **Marker Showing Threshold**: Minimum length of marker segment group to display the marker. It's more a display parameter than a calculation parameter (default 5 km)
 
-**Information panel** with global statistics for the entire network based on current parameters
+**Information panel** with global statistics for the entire network based on current parameters:
+- **Green Network Length**: Sum of the lengths of the green segments of the exhaustive network
+- **Orange Network Length**: Sum of the lengths of the orange segments of the exhaustive network
+- **Red Network Length**: Sum of the lengths of the red segments of the exhaustive network
+- **Exhaustive Network Length**: Total length of the exhaustive network (No matter the color)
+- **Simplified Network Length**: Total length of the simplified network (No matter the color)
+
+**Theme switch** between light and dark mode
+
+**Search bar** to find a specific location
+
+**Right-click** on the map to get the coordinates
 
 
 ## Installation
@@ -131,7 +150,3 @@ For each segment:
   </div>
 
 All squares with at least one point within `buffer_distance` of the segment are considered in the color calculation. The segment color is determined by the highest population density among all retrieved squares.
-
-
-
-clic droit: on a les coordonnées
