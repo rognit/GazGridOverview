@@ -1,6 +1,7 @@
 import pandas as pd
 from tqdm import tqdm
 
+
 def make_paths(df, show_tqdm, desc):
     def merge_region_color_segments(df):
         def common_point(seg0, group):
@@ -9,22 +10,36 @@ def make_paths(df, show_tqdm, desc):
                     return True
             return False
 
-        def recursive_merge(paths):
-            for i, (path1, length1) in enumerate(paths):
-                for j, (path2, length2) in enumerate(paths):
-                    if i != j:
+        def iterative_merge(paths):
+            changed = True
+            while changed:
+                changed = False
+                for i in range(len(paths)):
+                    for j in range(i + 1, len(paths)):
+                        path1, length1 = paths[i]
+                        path2, length2 = paths[j]
+                        merged = False
                         if path1[-1] == path2[0]:
-                            return recursive_merge(
-                                [p for k, p in enumerate(paths) if i != k != j] + [(path1 + path2[1:], length1 + length2)])
+                            new_path = path1 + path2[1:]
+                            merged = True
                         elif path1[0] == path2[-1]:
-                            return recursive_merge(
-                                [p for k, p in enumerate(paths) if i != k != j] + [(path2 + path1[1:], length1 + length2)])
+                            new_path = path2 + path1[1:]
+                            merged = True
                         elif path1[0] == path2[0]:
-                            return recursive_merge(
-                                [p for k, p in enumerate(paths) if i != k != j] + [(path2[::-1] + path1[1:], length1 + length2)])
+                            new_path = path2[::-1] + path1[1:]
+                            merged = True
                         elif path1[-1] == path2[-1]:
-                            return recursive_merge(
-                                [p for k, p in enumerate(paths) if i != k != j] + [(path1 + path2[::-1][1:], length1 + length2)])
+                            new_path = path1 + path2[::-1][1:]
+                            merged = True
+
+                        if merged:
+                            new_length = length1 + length2
+                            paths[i] = (new_path, new_length)
+                            paths.pop(j)
+                            changed = True
+                            break
+                    if changed:
+                        break
             return paths
 
         # Making groups of segment that share at least one common point
@@ -47,7 +62,7 @@ def make_paths(df, show_tqdm, desc):
         # Merge segments into a minimum of paths
         paths = []
         for group in groups:
-            paths.extend(recursive_merge(group))
+            paths.extend(iterative_merge(group))
         return paths
 
     merged_section = []
