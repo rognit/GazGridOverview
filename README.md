@@ -1,39 +1,95 @@
-# GazGridOverview
-<p align="center">
-    <img src="resources/icon.ico" alt="Logo" />
-</p>
+
+<div align="center">
+  <h1>GazGridOverview</h1>
+  <img src="resources/icon.ico" alt="Logo"/>
+</div>
 
 GazGridOverview is a project aimed at providing an interactive interface for viewing the flyable sections of the gas network in metropolitan France. This project is designed to offer a clear and intuitive visualization of gas infrastructures, thereby facilitating aerial network monitoring.
 
 The core of this project is the intersection between population data from INSEE (gridded data at 200m from the 2019 study "Income, poverty, and living standards") and data from the two gas distribution networks: GRTgaz and Teréga.
 
-<div style="text-align: center;">
-    <img src="doc/images/Screenshot global.png" alt="Screenshot global" />
-    <img src="doc/images/Screenshot details.png" alt="Screenshot details" />
+<div align="center">
+    <img src="doc/images/Screenshot_1.png" alt="Screenshot 1" />
+    <img src="doc/images/Screenshot_2.png" alt="Screenshot 2" />
+    <img src="doc/images/Screenshot_3.png" alt="Screenshot 3" />
 </div>
 
+# Installation
 
-## Features
+## Clone the repository and install dependencies
 
-### Base feature
+```bash
+git clone https://github.com/rognit/GazGridOverview.git
+cd GazGridOverview
+pip install -r requirements.txt
+```
 
-**Interactive visualization of the French metropolitan gas network**
+## Download and prepare the data:
+
+Download the data in CSV format from the following sources:
+- [INSEE](https://www.insee.fr/fr/statistiques/7655475?sommaire=7655515)
+- [GRTgaz](https://www.data.gouv.fr/fr/datasets/trace-simplifie-du-reseau-grtgaz-precis-a-environ-250-m/)
+- [Teréga](https://www.data.gouv.fr/fr/datasets/trace-simplifie-du-reseau-terega-precis-a-environ-250-m/)
+
+The files must retain their original names:
+- `carreaux_200m_met_2019.csv`
+- `trace-du-reseau-grt-250.csv`
+- `terega-trace-du-reseau.csv`
+
+and be placed in the `resources/raw/` folder.
+
+## Pre-process the data
+
+Run the following scripts to filter the data and create the base resource files:
+
+```bash
+python setup.py
+```
+This will create the following required files in the `resources/` folder:
+- `base_gaz_network.csv`
+- `base_population.csv`
+- `simplified_computed_gaz_network.csv`
+- `exhaustive_computed_gaz_network.csv`
+- `information.csv`
+- `green_markers.csv`
+- `orange_markers.csv`
+
+## Run the project:
+
+```bash
+python main.py
+```
+
+## Build version:
+
+```bash
+pyinstaller --onefile --icon='resources/icon.ico' --add-data 'resources/icon.ico:resources' --add-data 'resources/base_gaz_network.csv:resources' --add-data 'resources/base_population.csv:resources' --add-data 'resources/simplified_computed_gaz_network.csv:resources' --add-data 'resources/exhaustive_computed_gaz_network.csv:resources' --add-data 'resources/information.csv:resources' --add-data 'resources/green_markers.csv:resources' --add-data 'resources/orange_markers.csv:resources' --name GazGridOverview main.py
+```
+The build file will then be located in the `dist/` folder.
+
+
+
+# Features
+
+## Base feature
+
+### Interactive visualization of the French metropolitan gaz network
 - Ability to toggle regions on/off (local data).
 - Population density above each segment (segment overflight difficulty) with three color levels:
   - **Green**: less than 250 inhabitants/km² (no overflight restriction)
   - **Orange**: between 250 and 2500 inhabitants/km² (authorization required)
   - **Red**: more than 2500 inhabitants/km² (overflight impossible)
 
-See the [Segment Color Calculation](doc/segment_color_calculation.md#algorithm-details) section for more details.
+See [Segment Color Calculation](doc/segment_color_calculation.md) for more details.
 
-### Simplified network toggle
+## Simplified network toggle
 
 - **Exhaustive View**: Visualisation of the classic French gaz network (base view)
 - **Simplified View**: Visualization of a simpler version of the network, made by merging nearby nodes
 
-See the [Simplified Network Calculation](doc/segment_color_calculation.md#algorithm-details) section for more details.
+See [Simplified Network Calculation](doc/simplified_network_calculation.md) for more details.
 
-### Marker toggle
+## Marker toggle
 
 A marker highlights a related sub-part of the network, connected, of maximum size, which complies with one of the following rules:
 - **Green Marker**: pure green subnetwork (no overflight restriction)
@@ -45,9 +101,7 @@ When a marker is clicked, the key information about the subnetwork are displayed
 - Exhaustive Total Length
 - Simplified Total Length
 
-See the [Marker Calculation](doc/segment_color_calculation.md#algorithm-details) section for more details.
-
-### Other Features
+## Other Features
 
 4 supported **map backgrounds** (API call):
 - **OpenStreetMap**
@@ -77,76 +131,3 @@ See the [Marker Calculation](doc/segment_color_calculation.md#algorithm-details)
 **Search bar** to find a specific location
 
 **Right-click** on the map to get the coordinates
-
-
-## Installation
-
-### Clone the repository and install dependencies
-
-```bash
-git clone https://github.com/rognit/GazGridOverview.git
-cd GazGridOverview
-pip install -r requirements.txt
-```
-
-### Download and prepare the data:
-Download the data in CSV format
-
-- [INSEE](https://www.insee.fr/fr/statistiques/7655475?sommaire=7655515)
-- [GRTgaz](https://www.data.gouv.fr/fr/datasets/trace-simplifie-du-reseau-grtgaz-precis-a-environ-250-m/)
-- [Teréga](https://www.data.gouv.fr/fr/datasets/trace-simplifie-du-reseau-terega-precis-a-environ-250-m/)
-
-The files must retain their original names:
-- `carreaux_200m_met_2019.csv`
-- `trace-du-reseau-grt-250.csv`
-- `terega-trace-du-reseau.csv`
-
-and be placed in the `resources/raw/` folder.
-
-A slight manual data cleaning is required (some regions may be missing from certain segments, and there are also duplicates that need to be removed).
-
-### Pre-process the data
-Run the following scripts to filter the data and create the base resource files:
-
-```bash
-python setup.py
-```
-
-This will create the files `resources/gaz_network.csv` and `resources/pop_filtered.csv`.
-
-Then run the `data/calculator.py` file for an initial calculation of segment colors:
-
-```bash
-python data/calculator.py
-```
-
-### Run the project:
-
-```bash
-python main.py
-```
-
-### Build version:
-
-```bash
-pyinstaller --onefile --icon='resources/icon.ico' --add-data 'resources/icon.ico:resources' --add-data 'resources/base_gaz_network.csv:resources' --add-data 'resources/base_population.csv:resources' --add-data 'resources/simplified_computed_gaz_network.csv:resources' --add-data 'resources/exhaustive_computed_gaz_network.csv:resources' --add-data 'resources/information.csv:resources' --add-data 'resources/green_markers.csv:resources' --add-data 'resources/orange_markers.csv:resources' --name GazGridOverview main.py
-```
-
-The build file will then be located in the `dist/` folder.
-
-## Algorithm Details
-
-For each segment:
-- **For the edge**:
-
-  <div style="text-align: center;">
-    <img src="doc/images/edge.png" alt="edge" />
-  </div>
-
-- **For the two vertices**:
-
-  <div style="text-align: center;">
-    <img src="doc/images/vertex.png" alt="vertex" />
-  </div>
-
-All squares with at least one point within `buffer_distance` of the segment are considered in the color calculation. The segment color is determined by the highest population density among all retrieved squares.
