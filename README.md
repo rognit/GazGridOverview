@@ -9,8 +9,8 @@ GazGridOverview is a project aimed at providing an interactive interface for vie
 The core of this project is the intersection between population data from INSEE (gridded data at 200m from the 2019 study "Income, poverty, and living standards") and data from the two gas distribution networks: GRTgaz and Teréga.
 
 <div align="center">
-    <img src="doc/images/Screenshot_1.png" alt="Screenshot 1" />
     <img src="doc/images/Screenshot_2.png" alt="Screenshot 2" />
+    <img src="doc/images/Screenshot_1.png" alt="Screenshot 1" />
     <img src="doc/images/Screenshot_3.png" alt="Screenshot 3" />
 </div>
 
